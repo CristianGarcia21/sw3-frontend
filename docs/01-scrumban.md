@@ -83,12 +83,17 @@ Una historia pasa a Done cuando:
 | E4. Dependencia externa bloqueada | Etiqueta `bloqueado`, motivo, fecha e impacto en el Sprint Goal. Se busca alternativa (datos semilla, mock del endpoint en el front) y se registra en métricas de bloqueos. |
 | E5. El cliente pide algo nuevo | Se crea una issue con la plantilla de historia, queda en Product Backlog, el PO la prioriza y se analiza capacidad antes de meterla en un sprint. No entra directo a desarrollo. |
 
-## Configuración manual del tablero
+## Vistas del tablero
 
-GitHub no permite crear vistas ni límites de columna por API, así que esto se hace una vez a mano:
+| Vista | Tipo | Qué muestra |
+|---|---|---|
+| **ScrumBan · Historias** | Tablero | Las 12 historias por columna (Status), con Story Points, Sprint, Prioridad, progreso de sub-issues y si está bloqueada. Es el tablero principal y el que se mira en la Daily. Los límites WIP se aplican aquí |
+| **Tareas del equipo** | Tablero | Las tareas técnicas por columna, con responsable, área, sprint e historia padre |
+| **Por responsable** | Tablero | Una columna por integrante con sus tareas sin terminar. Sirve para ver de un vistazo quién está cargado y quién puede ayudar |
+| **Roadmap** | Línea de tiempo | Las historias sobre los tres sprints simulados |
+| **Métricas** | Tabla | Fechas Ready, inicio y Done, Story Points y bloqueos de cada historia para calcular Lead Time y Cycle Time |
 
-1. Abrir el Project → vista por defecto → cambiar el layout a **Board**, agrupado por `Status`.
-2. En el menú de cada columna → **Set limit**: En análisis 3, En atención 3, En validación 2.
-3. Filtrar la vista con `label:historia` y guardarla como "Tablero ScrumBan".
-4. Crear otra vista tipo **Table** llamada "Tareas" con filtro `label:tarea` y agrupada por `Responsable`.
-5. Crear otra vista **Table** llamada "Métricas" que muestre Sprint, Story Points, Fecha Ready, Fecha inicio y Fecha Done.
+Las vistas se crearon por API. Hay dos cosas que GitHub solo deja hacer desde la página:
+
+1. En **ScrumBan · Historias**, abrir el menú `…` de cada columna → **Set limit**: En análisis 3, En atención 3, En validación 2. Así el encabezado muestra `2 / 3` y se pone en rojo si se pasa.
+2. Borrar las vistas sobrantes "View 1" y "Tablero ScrumBan" (menú de la pestaña → Delete view) y arrastrar **ScrumBan · Historias** para dejarla de primera.
