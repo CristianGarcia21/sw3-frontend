@@ -21,8 +21,28 @@ Los seis desarrollan. Los roles adicionales de Tania, Juan Fernando y Juan Diego
 
 - React 19 + TypeScript
 - Vite
+- React Router (rutas)
+- Tailwind CSS (estilos)
+- Recharts (gráficos de indicadores)
+- `fetch` envuelto en `src/api/client.ts` para llamar a la API, sin librerías extra
 - oxlint
 - Consume la API REST de `sw3-backend`
+
+Los formularios usan estado de React y validación propia (son pocos campos). No se agregan otras librerías sin acordarlo en la Daily, para que todos trabajen igual.
+
+### Rutas de la aplicación
+
+| Ruta | Pantalla | Rol |
+|---|---|---|
+| `/` | Redirige según el rol del usuario de prueba | Todos |
+| `/casos/nuevo` | Registrar caso (HU-01) | Solicitante |
+| `/mis-casos` | Mis casos (HU-02) | Solicitante |
+| `/mis-casos/:id` | Detalle de mi caso y solución (HU-12) | Solicitante |
+| `/bandeja` | Bandeja de casos con filtros (HU-03, HU-09) | Agente, Administrador |
+| `/casos/:id` | Detalle con acciones, atención, validación e historial (HU-04 a HU-08) | Agente, Validador, Administrador |
+| `/validacion` | Casos por validar (HU-07) | Validador |
+| `/admin/indicadores` | Indicadores (HU-10) | Administrador |
+| `/admin/categorias` | Administrar categorías (HU-11) | Administrador |
 
 ## Cómo ejecutarlo
 

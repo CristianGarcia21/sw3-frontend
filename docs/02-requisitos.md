@@ -18,16 +18,19 @@ Fuera de alcance: soporte médico, mantenimiento locativo, procesos académicos 
 
 No hay autenticación real (el taller lo permite). El frontend tiene un selector de "usuario de prueba" y envía su id al backend en la cabecera `X-Usuario-Id`. El backend usa ese id para aplicar las reglas por rol.
 
-### Usuarios de prueba (datos semilla)
+### Datos semilla
 
-| Nombre | Rol |
-|---|---|
-| Laura Méndez | Solicitante (estudiante) |
-| Carlos Ruiz | Solicitante (docente) |
-| Andrés Pérez | Agente |
-| Marta Gómez | Agente |
-| Sofía Rojas | Validador |
-| Admin TI | Administrador |
+En una base de datos nueva el seed deja estos ids. Las pruebas y los ejemplos de la API los usan.
+
+| id | Nombre | Correo | Rol | Activo |
+|---|---|---|---|---|
+| 1 | Laura Méndez | laura.mendez@campushelp.test | SOLICITANTE (estudiante) | sí |
+| 2 | Carlos Ruiz | carlos.ruiz@campushelp.test | SOLICITANTE (docente) | sí |
+| 3 | Andrés Pérez | andres.perez@campushelp.test | AGENTE | sí |
+| 4 | Marta Gómez | marta.gomez@campushelp.test | AGENTE | sí |
+| 5 | Sofía Rojas | sofia.rojas@campushelp.test | VALIDADOR | sí |
+| 6 | Admin TI | admin@campushelp.test | ADMINISTRADOR | sí |
+| 7 | Pedro Salas | pedro.salas@campushelp.test | AGENTE | **no** (sirve para probar RN-18) |
 
 Son personas ficticias creadas para las pruebas.
 
@@ -40,15 +43,15 @@ Son personas ficticias creadas para las pruebas.
 | Incidente | Interrupción o degradación de un servicio tecnológico | "No puedo conectarme al Wi-Fi institucional." |
 | Solicitud de servicio | Petición de una acción o servicio tecnológico | "Necesito que instalen Visual Studio en mi equipo institucional." |
 
-**Áreas y categorías iniciales (datos semilla)**
+**Áreas y categorías iniciales (datos semilla, con sus ids en una BD nueva)**
 
-| Área | Categorías |
-|---|---|
-| Hardware | Computador, Periférico, Proyector, Impresora |
-| Software | Instalación, Error de aplicación, Actualización |
-| Red y conectividad | Wi-Fi, Internet, Red cableada |
-| Cuentas y acceso | Contraseña, Bloqueo de cuenta, Correo institucional, Permisos |
-| Plataformas académicas | Campus virtual, Sistema académico |
+| id | Área | Categorías (id) |
+|---|---|---|
+| 1 | Hardware | Computador (1), Periférico (2), Proyector (3), Impresora (4) |
+| 2 | Software | Instalación (5), Error de aplicación (6), Actualización (7) |
+| 3 | Red y conectividad | Wi-Fi (8), Internet (9), Red cableada (10) |
+| 4 | Cuentas y acceso | Contraseña (11), Bloqueo de cuenta (12), Correo institucional (13), Permisos (14) |
+| 5 | Plataformas académicas | Campus virtual (15), Sistema académico (16) |
 
 Las áreas son fijas (las cinco del enunciado). Las categorías las administra el administrador (HU-11).
 
