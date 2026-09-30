@@ -1,6 +1,6 @@
 # Sprint 2
 
-**Fechas:** 7 oct – 13 oct 2026
+**Fechas:** jue 1 – vie 2 oct 2026 (sprint simulado de 2 días)
 
 ## Sprint Planning
 
@@ -14,7 +14,7 @@
 | HU-08 | Consultar el historial | P2 | 5 |
 | | **Total** | | **18** |
 
-**Capacidad:** 6 integrantes durante una semana, combinada con las otras materias. Antes de confirmar, se compara con el Throughput y los SP terminados en el sprint anterior (ver 07-metricas.md). Si el sprint anterior no se terminó, se reduce el compromiso.
+**Capacidad:** 6 integrantes desarrollando en paralelo durante dos días. Antes de confirmar, se compara con el Throughput y los SP terminados en el sprint anterior (ver 07-metricas.md). Si el sprint anterior no se terminó, se reduce el compromiso.
 
 **Dependencias y riesgos:** HU-06 depende de HU-04 y HU-07 depende de HU-06, así que el orden de arranque es HU-04 → HU-06 → HU-07. HU-08 puede ir en paralelo porque los eventos de historial existen desde el Sprint 1. Riesgo: si Validación se llena (WIP 2) al final del sprint, los desarrolladores ayudan a probar.
 

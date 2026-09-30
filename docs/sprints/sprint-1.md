@@ -1,6 +1,6 @@
 # Sprint 1
 
-**Fechas:** 30 sep – 6 oct 2026
+**Fechas:** mar 29 – mié 30 sep 2026 (sprint simulado de 2 días)
 
 ## Sprint Planning
 
@@ -14,7 +14,7 @@
 | HU-05 | Cambiar el estado del caso | P1 | 5 |
 | | **Total** | | **16** |
 
-**Capacidad:** 6 integrantes durante una semana, combinada con las otras materias. Todavía no hay Throughput histórico, así que el compromiso sale de la estimación.
+**Capacidad:** 6 integrantes desarrollando en paralelo durante dos días. Todavía no hay Throughput histórico, así que el compromiso sale de la estimación.
 
 **Dependencias y riesgos:** HU-01 es la base de todo: mientras no estén el modelo de datos y el seed, el resto no puede probarse con datos reales. Por eso Tania arranca con BD el primer día y el front puede avanzar con datos simulados. HU-05 se hace completa, pero las condiciones de agente asignado (RN-11) y de solución registrada (RN-13) se conectan en el Sprint 2.
 

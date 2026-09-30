@@ -1,6 +1,6 @@
 # Sprint 3
 
-**Fechas:** 14 oct – 20 oct 2026
+**Fechas:** sáb 3 oct 2026 (sprint simulado de 1 día)
 
 ## Sprint Planning
 
@@ -14,9 +14,9 @@
 | HU-12 | Detalle de mi caso y solución | P3 | 3 |
 | | **Total** | | **14** |
 
-**Capacidad:** 6 integrantes durante una semana, combinada con las otras materias. Antes de confirmar, se compara con el Throughput y los SP terminados en el sprint anterior (ver 07-metricas.md). Si el sprint anterior no se terminó, se reduce el compromiso.
+**Capacidad:** 6 integrantes desarrollando en paralelo durante un día. Antes de confirmar, se compara con el Throughput y los SP terminados en el sprint anterior (ver 07-metricas.md). Si el sprint anterior no se terminó, se reduce el compromiso.
 
-**Dependencias y riesgos:** Son historias bastante independientes entre sí, así que se pueden trabajar en paralelo sin pasar el WIP. HU-10 necesita casos cerrados con fechas reales; Juan Diego prepara datos de prueba. Al final del sprint se reserva tiempo para ensayar la demo del flujo completo.
+**Dependencias y riesgos:** Son historias bastante independientes entre sí, así que se pueden trabajar en paralelo sin pasar el WIP. HU-10 necesita casos cerrados con fechas reales; Juan Diego prepara datos de prueba. Como el sprint dura un solo día, se empieza con las tareas que no dependen de nada pendiente y la última parte del día se reserva para ensayar la demo del flujo completo.
 
 **Fecha real de la Planning:**
 **Asistentes:**

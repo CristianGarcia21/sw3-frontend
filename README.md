@@ -6,16 +6,16 @@ Este repositorio tiene el frontend en React y también el tablero ScrumBan (GitH
 
 ## Equipo
 
-| Integrante | Rol |
-|---|---|
-| Juan José | Desarrollo Backend |
-| Cristian García | Desarrollo Frontend |
-| Valentina Galvis | Desarrollo Frontend |
-| Tania Botina | Scrum Master y apoyo Backend/BD |
-| Juan Fernando | Product Owner, documentación y métricas |
-| Juan Diego | QA / Pruebas |
+| Integrante | Desarrollo | Rol adicional |
+|---|---|---|
+| Juan José | Backend | – |
+| Tania Botina | Backend / BD | Scrum Master |
+| Juan Fernando | Backend | Product Owner (documentación y métricas) |
+| Cristian García | Frontend | – |
+| Valentina Galvis | Frontend | – |
+| Juan Diego | Frontend | QA / Pruebas |
 
-Los roles de Tania, Juan Fernando y Juan Diego se asignaron por sorteo. El detalle está en [docs/00-equipo-y-acuerdos.md](docs/00-equipo-y-acuerdos.md).
+Los seis desarrollan. Los roles adicionales de Tania, Juan Fernando y Juan Diego se asignaron por sorteo. Los sprints son simulados: tres sprints en cinco días (29 sep – 3 oct). El detalle está en [docs/00-equipo-y-acuerdos.md](docs/00-equipo-y-acuerdos.md).
 
 ## Tecnologías
 

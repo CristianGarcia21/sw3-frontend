@@ -6,36 +6,42 @@ Tener un MVP de CampusHelp donde un caso de soporte tecnológico (incidente o so
 
 ## Roles
 
-| Integrante | Rol | Responsabilidades en el proyecto |
+Los seis desarrollamos. Además, tres personas tienen un rol de Scrum que cumplen al mismo tiempo que programan.
+
+| Integrante | Desarrollo | Rol adicional |
 |---|---|---|
-| Juan José | Desarrollo Backend | API REST en `sw3-backend`, reglas de negocio, transiciones de estado, historial |
-| Cristian García | Desarrollo Frontend | Estructura del front, cliente de la API, pantallas del solicitante y del agente |
-| Valentina Galvis | Desarrollo Frontend | Pantallas de validación, historial, filtros, indicadores y administración de categorías |
-| Tania Botina | Scrum Master + apoyo Backend/BD | Facilita los eventos, cuida los límites WIP y los bloqueos del tablero. Modelo Prisma, migraciones y datos semilla |
-| Juan Fernando | Product Owner + documentación | Ordena y refina el backlog, acepta las historias, lleva el registro de métricas y la documentación |
-| Juan Diego | QA / Pruebas | Diseña y ejecuta los casos de prueba, registra defectos y verifica criterios de aceptación |
+| Juan José | Backend (líder: máquina de estados, atención, historial, indicadores) | Revisa los PR de backend |
+| Tania Botina | Backend / BD (modelo Prisma, asignación, filtros, detalle) | Scrum Master: facilita los eventos, cuida los límites WIP y los bloqueos |
+| Juan Fernando | Backend (seed, catálogos, bandeja, validación, categorías) | Product Owner: ordena el backlog, acepta historias, lleva métricas y documentación |
+| Cristian García | Frontend (líder: base del proyecto, bandeja, asignación, historial, indicadores) | Revisa los PR de frontend |
+| Valentina Galvis | Frontend (registro, detalle y acciones, validación, categorías, detalle del solicitante) | – |
+| Juan Diego | Frontend (mis casos, reclasificación, atención, filtros) | QA: coordina las pruebas y revisa que los resultados queden registrados |
 
 Los roles de Tania, Juan Fernando y Juan Diego salieron de un sorteo. Juan José, Cristian y Valentina tenían su rol definido desde el inicio.
 
-Tener un rol no significa trabajar solo en eso. Si una columna del tablero llega a su límite WIP, cualquiera ayuda a sacar trabajo de ahí (por ejemplo, un desarrollador puede ejecutar pruebas para liberar "En validación").
+Cada historia la prueba alguien que no la programó. Así cada uno termina probando trabajo de otro y nadie valida lo suyo.
 
-## Cadencia
+Si una columna del tablero llega a su límite WIP, cualquiera ayuda a sacar trabajo de ahí antes de empezar algo nuevo.
+
+## Cadencia (sprints simulados)
+
+El taller plantea tres sprints de una semana, pero tenemos cinco días (martes 29 de septiembre a sábado 3 de octubre). Mantenemos los tres sprints y todos sus eventos, comprimidos en días:
 
 | Sprint | Fechas | Objetivo |
 |---|---|---|
-| Sprint 1 | 30 sep – 6 oct 2026 | Flujo básico de registro y consulta |
-| Sprint 2 | 7 oct – 13 oct 2026 | Asignación, atención, validación e historial |
-| Sprint 3 | 14 oct – 20 oct 2026 | Filtros, indicadores, categorías y detalle |
-
-Si el docente fija otras fechas, se cambian aquí y en el campo `Sprint` del tablero.
+| Sprint 1 | mar 29 – mié 30 sep | Flujo básico de registro y consulta |
+| Sprint 2 | jue 1 – vie 2 oct | Asignación, atención, validación e historial |
+| Sprint 3 | sáb 3 oct | Filtros, indicadores, categorías, detalle y demo |
 
 | Evento | Cuándo | Duración | Quién facilita |
 |---|---|---|---|
-| Sprint Planning | Primer día del sprint | 45 min | Tania (SM), Juan Fernando presenta el backlog |
-| Daily | Todos los días (puede ser por WhatsApp/Meet si no coincidimos) | 10–15 min | Tania |
-| Refinement | A mitad de sprint | 30 min | Juan Fernando |
-| Sprint Review | Último día del sprint | 30 min | Juan Fernando, demo de quien desarrolló |
-| Retrospective | Después de la Review | 30 min | Tania |
+| Sprint Planning | Al inicio del primer día de cada sprint | 20 min | Tania (SM), Juan Fernando presenta el backlog |
+| Daily | Cada día al empezar (Meet o WhatsApp) | 10 min | Tania |
+| Refinement | Al final del primer día del Sprint 1 y del Sprint 2, para dejar Ready el siguiente sprint | 15 min | Juan Fernando |
+| Sprint Review | Al cierre del último día del sprint | 15 min | Juan Fernando, demo de quien desarrolló |
+| Retrospective | Justo después de la Review | 15 min | Tania |
+
+Como los sprints son cortos, las métricas de tiempo (Lead Time y Cycle Time) se miden en horas y no en días.
 
 En la Daily se mira el tablero de derecha a izquierda: primero lo que está cerca de Done, luego lo bloqueado y al final lo que se podría empezar.
 

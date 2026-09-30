@@ -1,6 +1,6 @@
 # ScrumBan: tablero y políticas
 
-Usamos la cadencia de Scrum (sprints de una semana con Planning, Daily, Refinement, Review y Retro) y manejamos el flujo como en Kanban: tablero visible, límites WIP y sistema pull.
+Usamos la cadencia de Scrum (tres sprints con Planning, Daily, Refinement, Review y Retro, simulados en cinco días; ver [00-equipo-y-acuerdos.md](00-equipo-y-acuerdos.md)) y manejamos el flujo como en Kanban: tablero visible, límites WIP y sistema pull.
 
 ## Tablero
 

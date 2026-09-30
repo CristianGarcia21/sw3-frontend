@@ -10,10 +10,10 @@ El taller no permite inventar las métricas al final, así que las fechas se lle
 |---|---|---|
 | WIP | Número de historias en En análisis + En atención + En validación | Se anota en cada Daily (tabla de abajo) |
 | Throughput | Historias que llegaron a Done en el sprint | Contar historias con `Fecha Done` dentro del sprint |
-| Lead Time | `Fecha Done − Fecha Ready`, en días | Campos del tablero |
-| Cycle Time | `Fecha Done − Fecha inicio`, en días | Campos del tablero |
+| Lead Time | `Fecha Done − Fecha Ready`, en horas | Campos del tablero |
+| Cycle Time | `Fecha Done − Fecha inicio`, en horas | Campos del tablero |
 | Defectos | Issues con etiqueta `defecto` creadas en el sprint | Filtro `label:defecto` en el repo |
-| Bloqueos | Cantidad de bloqueos y días que duró cada uno | Comentarios de bloqueo/desbloqueo en las issues con etiqueta `bloqueado` |
+| Bloqueos | Cantidad de bloqueos y horas que duró cada uno | Comentarios de bloqueo/desbloqueo en las issues con etiqueta `bloqueado` |
 
 Reglas para las fechas:
 
@@ -21,6 +21,8 @@ Reglas para las fechas:
 - **Fecha inicio**: la pone quien mueve la historia a En análisis, ese mismo día.
 - **Fecha Done**: la pone el PO cuando acepta la historia.
 - Nunca se editan fechas pasadas. Si algo quedó mal, se deja comentario en la issue explicando la corrección.
+
+Como cada sprint dura uno o dos días, las fechas del tablero se complementan con la hora exacta en un comentario de la issue al moverla (por ejemplo, "Pasa a En atención – 30/09 14:20"). Con eso se calculan los tiempos en horas.
 
 ## WIP diario
 
@@ -30,13 +32,13 @@ Reglas para las fechas:
 
 ## Registro de bloqueos
 
-| Issue | Motivo | Desde | Hasta | Días | Impacto | Cómo se resolvió |
+| Issue | Motivo | Desde | Hasta | Horas | Impacto | Cómo se resolvió |
 |---|---|---|---|---|---|---|
 | | | | | | | |
 
 ## Tiempos por historia
 
-| Historia | SP | Sprint | Fecha Ready | Fecha inicio | Fecha Done | Lead Time (días) | Cycle Time (días) |
+| Historia | SP | Sprint | Fecha Ready | Fecha inicio | Fecha Done | Lead Time (h) | Cycle Time (h) |
 |---|---|---|---|---|---|---|---|
 | HU-01 | 5 | 1 | | | | | |
 | HU-02 | 3 | 1 | | | | | |
@@ -53,15 +55,15 @@ Reglas para las fechas:
 
 ## Consolidado por sprint
 
-| Sprint | SP comprometidos | Historias comprometidas | Throughput | SP terminados | Lead Time promedio | Cycle Time promedio | WIP promedio | Defectos | Bloqueos (cantidad / días) |
+| Sprint | SP comprometidos | Historias comprometidas | Throughput | SP terminados | Lead Time promedio | Cycle Time promedio | WIP promedio | Defectos | Bloqueos (cantidad / horas) |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | 16 | 4 | | | | | | | |
-| 2 | 18 | 4 | | | | | | | |
-| 3 | 14 | 4 | | | | | | | |
+| 1 (29–30 sep) | 16 | 4 | | | | | | | |
+| 2 (1–2 oct) | 18 | 4 | | | | | | | |
+| 3 (3 oct) | 14 | 4 | | | | | | | |
 
 ## Comparación entre dos momentos
 
-El taller pide comparar al menos dos momentos y decir si una mejora tuvo efecto. Se llena después de la Retro del Sprint 2 (comparando Sprint 1 contra Sprint 2) y se actualiza al final del Sprint 3.
+El taller pide comparar al menos dos momentos y decir si una mejora tuvo efecto. Se llena en la Retro del Sprint 2 (Sprint 1 contra Sprint 2) y se actualiza al final del Sprint 3.
 
 | | Momento 1 (Sprint __) | Momento 2 (Sprint __) | ¿Cambió? |
 |---|---|---|---|
