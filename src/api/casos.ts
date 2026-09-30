@@ -1,0 +1,30 @@
+import type { Caso, EstadoCaso, Prioridad, TipoCaso } from '../types'
+import { api } from './client'
+
+export interface NuevoCaso {
+  tipo: TipoCaso
+  titulo: string
+  descripcion: string
+  prioridad: Prioridad
+  areaId: number
+  categoriaId: number
+}
+
+/** POST /casos (solo SOLICITANTE) */
+export function registrarCaso(datos: NuevoCaso) {
+  return api<Caso>('/casos', { method: 'POST', body: datos })
+}
+
+/** Parámetros de GET /casos. Cada tarea agrega los que implemente el backend (ver docs/03-api.md) */
+export interface FiltrosCasos {
+  orden?: 'fecha_desc' | 'prioridad'
+  abiertos?: boolean
+  agenteId?: number
+  sinAgente?: boolean
+  estado?: EstadoCaso
+}
+
+/** GET /casos: a un SOLICITANTE el backend solo le devuelve sus casos */
+export function listarCasos(filtros: FiltrosCasos = {}) {
+  return api<Caso[]>('/casos', { query: { ...filtros } })
+}
