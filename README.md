@@ -22,7 +22,7 @@ Los seis desarrollan. Los roles adicionales de Tania, Juan Fernando y Juan Diego
 - React 19 + TypeScript
 - Vite
 - React Router (rutas)
-- Tailwind CSS (estilos)
+- Tailwind CSS (estilos), con el sistema de diseño propio descrito en [docs/08-diseno.md](docs/08-diseno.md)
 - Recharts (gráficos de indicadores)
 - `fetch` envuelto en `src/api/client.ts` para llamar a la API, sin librerías extra
 - oxlint
@@ -43,6 +43,7 @@ Los formularios usan estado de React y validación propia (son pocos campos). No
 | `/validacion` | Casos por validar (HU-07) | Validador |
 | `/admin/indicadores` | Indicadores (HU-10) | Administrador |
 | `/admin/categorias` | Administrar categorías (HU-11) | Administrador |
+| `/componentes` | Galería del sistema de diseño (no sale en el menú ni necesita backend) | Todos |
 
 ## Cómo ejecutarlo
 
@@ -71,7 +72,9 @@ La app queda en http://localhost:5173. En el backend hay que agregar ese origen 
 src/
   api/         cliente HTTP y llamadas a sw3-backend
   components/  componentes reutilizables
+    ui/        componentes genéricos del sistema de diseño (botones, campos, listas, modales…)
   pages/       pantallas (registro, bandeja, detalle, validación, indicadores…)
+  context/     proveedores de estado global (usuario de prueba, tema, avisos)
   hooks/       hooks propios
   types/       tipos compartidos (Caso, Usuario, Categoria…)
 docs/          documentación del taller (requisitos, backlog, pruebas, métricas, sprints)
@@ -90,8 +93,15 @@ docs/          documentación del taller (requisitos, backlog, pruebas, métrica
 | [05-trazabilidad](docs/05-trazabilidad.md) | Historia ↔ reglas ↔ pruebas ↔ endpoints ↔ pantallas |
 | [06-pruebas](docs/06-pruebas.md) | Casos de prueba, resultados y registro de defectos |
 | [07-metricas](docs/07-metricas.md) | Cómo registramos WIP, Throughput, Lead/Cycle Time, defectos y bloqueos |
+| [08-diseno](docs/08-diseno.md) | Guía de diseño: colores, vidrio, componentes y reglas para que todas las pantallas se vean igual |
 | [sprints/](docs/sprints/) | Planning, Review y Retrospectiva de cada sprint |
 | [recursos/](docs/recursos/) | Material entregado por el docente |
+
+## Diseño y trabajo con IA
+
+Las pantallas siguen la [guía de diseño](docs/08-diseno.md). Los componentes genéricos se ven funcionando en `/componentes`.
+
+Si programas con un asistente de IA, las reglas del proyecto están en [AGENTS.md](AGENTS.md) y la mayoría de herramientas las leen solas. La skill `apple-design` está en `.agents/skills/`.
 
 ## Tablero ScrumBan
 

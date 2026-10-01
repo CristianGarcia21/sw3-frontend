@@ -9,7 +9,7 @@ export function RutaConRol({ roles, children }: { roles: Rol[]; children: ReactN
   if (!usuario || !roles.includes(usuario.rol)) {
     return (
       <Mensaje tipo="error" titulo="No tienes acceso a esta pantalla">
-        Cambia a un usuario de prueba con el rol adecuado en el selector de arriba.
+        Cambia a un usuario de prueba con el rol adecuado en el selector de la barra de navegación.
       </Mensaje>
     )
   }

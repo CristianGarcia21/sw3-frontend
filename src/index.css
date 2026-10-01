@@ -1,5 +1,224 @@
 @import 'tailwindcss';
 
-body {
-  @apply bg-slate-50 text-slate-800 antialiased;
+/* Sistema de diseño de CampusHelp (paleta Océano, estilo Liquid Glass). La guía está en docs/08-diseno.md */
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Tema claro */
+:root {
+  color-scheme: light;
+
+  --fondo: #e7efec;
+  --superficie: #ffffff;
+  --texto: #092635;
+  --texto-suave: #4d6964;
+  --linea: #d2e1db;
+  --acento: #1b4242;
+  --sobre-acento: #ffffff;
+  --tinte: color-mix(in srgb, #9ec8b9 48%, transparent);
+  --relleno: color-mix(in srgb, var(--texto) 5.5%, transparent);
+  --relleno-fuerte: color-mix(in srgb, var(--texto) 9%, transparent);
+
+  /* Estados del caso y avisos. Ninguno repite el tono del acento.
+     Pasan 4,5:1 como texto sobre su propio tinte al 13 %, en tarjeta y sobre el fondo de la página */
+  --estado-pendiente: #4e5f5d;
+  --estado-en-analisis: #944407;
+  --estado-en-atencion: #1f53c5;
+  --estado-en-validacion: #6e34d3;
+  --estado-cerrada: #3f660c;
+  --urgente: #b20e29;
+
+  /* Vidrio: relleno translúcido, borde claro, línea de pelo oscura por fuera y línea de luz arriba */
+  --vidrio: color-mix(in srgb, color-mix(in srgb, #ffffff 94%, var(--acento)) 62%, transparent);
+  --vidrio-grueso: rgb(255 255 255 / 0.82);
+  --vidrio-borde: rgb(255 255 255 / 0.95);
+  --vidrio-pelo: rgb(0 0 0 / 0.1);
+  --vidrio-luz: #ffffff;
+  --vidrio-sombra: rgb(0 0 0 / 0.13);
+  --lente: var(--superficie);
+  --lente-sombra: 0 1px 4px rgb(0 0 0 / 0.16), 0 0 0 0.5px rgb(0 0 0 / 0.06);
+  --velo: rgb(0 0 0 / 0.18);
+}
+
+/* Tema oscuro */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --fondo: #04141c;
+  --superficie: #092635;
+  --texto: #e6f1ed;
+  --texto-suave: #8fb0a6;
+  --linea: #1b4242;
+  --acento: #9ec8b9;
+  --sobre-acento: #092635;
+  --tinte: color-mix(in srgb, #5c8374 42%, transparent);
+
+  --estado-pendiente: #94aaa5;
+  --estado-en-analisis: #fbbf24;
+  --estado-en-atencion: #60a5fa;
+  --estado-en-validacion: #b39dfa;
+  --estado-cerrada: #a3e635;
+  --urgente: #ff7a7a;
+
+  --vidrio: color-mix(in srgb, color-mix(in srgb, #173c42 92%, var(--acento)) 58%, transparent);
+  --vidrio-grueso: color-mix(in srgb, #173c42 86%, transparent);
+  --vidrio-borde: rgb(255 255 255 / 0.14);
+  --vidrio-pelo: rgb(0 0 0 / 0.55);
+  --vidrio-luz: rgb(255 255 255 / 0.2);
+  --vidrio-sombra: rgb(0 0 0 / 0.55);
+  --lente: rgb(255 255 255 / 0.17);
+  --lente-sombra: inset 0 1px 0 rgb(255 255 255 / 0.12);
+  --velo: rgb(0 0 0 / 0.5);
+}
+
+/* Los tokens como clases de Tailwind: bg-superficie, text-acento, border-linea, rounded-tarjeta, ease-resorte… */
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-titulo: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+
+  --color-fondo: var(--fondo);
+  --color-superficie: var(--superficie);
+  --color-texto: var(--texto);
+  --color-texto-suave: var(--texto-suave);
+  --color-linea: var(--linea);
+  --color-acento: var(--acento);
+  --color-sobre-acento: var(--sobre-acento);
+  --color-tinte: var(--tinte);
+  --color-relleno: var(--relleno);
+  --color-relleno-fuerte: var(--relleno-fuerte);
+  --color-velo: var(--velo);
+
+  --color-estado-pendiente: var(--estado-pendiente);
+  --color-estado-en-analisis: var(--estado-en-analisis);
+  --color-estado-en-atencion: var(--estado-en-atencion);
+  --color-estado-en-validacion: var(--estado-en-validacion);
+  --color-estado-cerrada: var(--estado-cerrada);
+  --color-urgente: var(--urgente);
+
+  --radius-campo: 0.6875rem;
+  --radius-tarjeta: 1.125rem;
+  --radius-hoja: 1.75rem;
+
+  --ease-resorte: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --animate-aparecer: aparecer 0.42s var(--ease-resorte) both;
+  --animate-anillo: anillo linear forwards;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(6px);
+  }
+}
+
+@keyframes anillo {
+  to {
+    stroke-dashoffset: 128.8;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-fondo text-texto font-sans text-sm antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-titulo);
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+  }
+}
+
+/* Vidrio para la capa de controles: navegación, barras, cápsulas. Nunca sobre otro vidrio */
+@utility vidrio {
+  background: var(--vidrio);
+  backdrop-filter: blur(24px) saturate(190%);
+  border: 0.5px solid var(--vidrio-borde);
+  box-shadow:
+    0 0 0 0.5px var(--vidrio-pelo),
+    inset 0 1px 0 var(--vidrio-luz),
+    0 10px 30px var(--vidrio-sombra),
+    0 1px 3px rgb(0 0 0 / 0.07);
+}
+
+/* Vidrio grueso para lo que flota encima de todo: modales, menús, hojas */
+@utility vidrio-grueso {
+  background: var(--vidrio-grueso);
+  backdrop-filter: blur(44px) saturate(190%);
+  border: 0.5px solid var(--vidrio-borde);
+  box-shadow:
+    0 0 0 0.5px var(--vidrio-pelo),
+    inset 0 1px 0 var(--vidrio-luz),
+    0 24px 64px var(--vidrio-sombra),
+    0 2px 8px rgb(0 0 0 / 0.07);
+}
+
+/* Vidrio con el color de acento, para la acción principal de una barra */
+@utility vidrio-acento {
+  background: color-mix(in srgb, var(--acento) 90%, transparent);
+  color: var(--sobre-acento);
+  backdrop-filter: blur(24px) saturate(190%);
+  border: 0.5px solid rgb(255 255 255 / 0.3);
+  box-shadow:
+    0 0 0 0.5px var(--vidrio-pelo),
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    0 10px 30px var(--vidrio-sombra);
+}
+
+/* Cifras alineadas en tablas, contadores e identificadores */
+@utility cifras {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .vidrio,
+  .vidrio-grueso,
+  .aviso {
+    background: var(--superficie) !important;
+    backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.15s !important;
+    transition-property: opacity, background-color, color !important;
+  }
+}
+
+/* Aviso: gota de vidrio líquido. Deja ver el color de lo que tiene detrás, pero lo desenfoca lo suficiente para que el texto se lea */
+.aviso {
+  background: color-mix(in srgb, color-mix(in srgb, var(--superficie) 90%, var(--tono)) 64%, transparent);
+  backdrop-filter: blur(22px) saturate(220%) brightness(1.05);
+  border: 0.5px solid rgb(255 255 255 / 0.8);
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(255 255 255 / 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--tono) 24%, transparent),
+    0 0 0 0.5px rgb(0 0 0 / 0.1),
+    0 22px 46px rgb(0 0 0 / 0.2),
+    0 3px 8px rgb(0 0 0 / 0.08);
+}
+
+[data-theme='dark'] .aviso {
+  background: color-mix(in srgb, color-mix(in srgb, #173c42 84%, var(--tono)) 68%, transparent);
+  backdrop-filter: blur(22px) saturate(200%) brightness(0.9);
+  border-color: rgb(255 255 255 / 0.2);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -1px 0 rgb(255 255 255 / 0.1),
+    inset 0 0 0 1px color-mix(in srgb, var(--tono) 34%, transparent),
+    0 0 0 0.5px rgb(0 0 0 / 0.6),
+    0 22px 46px rgb(0 0 0 / 0.55);
 }

@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router'
 import { Layout } from './components/layout/Layout'
 import { RutaConRol } from './components/RutaConRol'
+import { Componentes } from './pages/Componentes'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { Inicio } from './pages/Inicio'
 import { NoEncontrada } from './pages/NoEncontrada'
@@ -77,6 +78,9 @@ export default function App() {
             </RutaConRol>
           }
         />
+
+        {/* Galería del sistema de diseño: no pide rol ni backend */}
+        <Route path={RUTAS.componentes} element={<Componentes />} />
 
         <Route path="*" element={<NoEncontrada />} />
       </Route>

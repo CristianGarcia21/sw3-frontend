@@ -1,39 +1,52 @@
 import { useUsuarioActual } from '../../hooks/useUsuarioActual'
 import { ETIQUETA_ROL } from '../../utils/etiquetas'
+import { Boton } from '../ui/Boton'
+import { ListaDesplegable } from '../ui/ListaDesplegable'
+
+const iniciales = (nombre: string) =>
+  nombre
+    .split(' ')
+    .map((p) => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 
 export function SelectorUsuario() {
   const { usuarios, usuario, cargando, error, seleccionar, recargar } = useUsuarioActual()
 
-  if (cargando) return <span className="text-sm text-slate-300">Cargando usuarios…</span>
+  if (cargando) return <span className="px-2 text-[13px] text-texto-suave">Cargando usuarios…</span>
 
   if (error) {
     return (
-      <div className="flex items-center gap-2 text-sm">
-        <span className="text-red-300" title={error.mensaje}>
+      <div className="flex flex-col items-start gap-2 px-2 text-[13px]">
+        <span className="text-urgente" title={error.mensaje}>
           No se pudieron cargar los usuarios
         </span>
-        <button type="button" onClick={recargar} className="rounded-md border border-slate-500 px-2 py-1 text-xs hover:bg-slate-700">
-          Reintentar
-        </button>
+        <Boton onClick={recargar}>Reintentar</Boton>
       </div>
     )
   }
 
   return (
-    <label className="flex items-center gap-2 text-sm">
-      <span className="hidden text-slate-300 sm:inline">Usuario de prueba</span>
-      <select
-        value={usuario?.id ?? ''}
-        onChange={(e) => seleccionar(e.target.value ? Number(e.target.value) : null)}
-        className="rounded-md border border-slate-600 bg-slate-800 px-2 py-1.5 text-white focus:ring-2 focus:ring-sky-400 focus:outline-none"
-      >
-        <option value="">Elige un usuario…</option>
-        {usuarios.map((u) => (
-          <option key={u.id} value={u.id}>
-            {u.nombre} · {ETIQUETA_ROL[u.rol]}
-          </option>
-        ))}
-      </select>
-    </label>
+    <ListaDesplegable
+      aria-label="Usuario de prueba"
+      opciones={usuarios.map((u) => ({ valor: u.id, texto: u.nombre, detalle: ETIQUETA_ROL[u.rol] }))}
+      valor={usuario?.id ?? null}
+      onChange={seleccionar}
+      variante="discreta"
+      contenido={
+        usuario ? (
+          <>
+            <span className="grid size-7.5 shrink-0 place-items-center rounded-full bg-tinte text-[11px] font-semibold text-acento">{iniciales(usuario.nombre)}</span>
+            <span className="flex min-w-0 flex-1 flex-col leading-tight">
+              <span className="truncate text-[13px] font-medium">{usuario.nombre}</span>
+              <span className="truncate text-[11px] text-texto-suave">{ETIQUETA_ROL[usuario.rol]} · usuario de prueba</span>
+            </span>
+          </>
+        ) : (
+          <span className="min-w-0 flex-1 truncate text-[13px] font-medium">Elige un usuario de prueba</span>
+        )
+      }
+    />
   )
 }
