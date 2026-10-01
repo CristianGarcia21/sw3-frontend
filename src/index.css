@@ -19,13 +19,14 @@
   --relleno: color-mix(in srgb, var(--texto) 5.5%, transparent);
   --relleno-fuerte: color-mix(in srgb, var(--texto) 9%, transparent);
 
-  /* Estados del caso y avisos. Ninguno repite el tono del acento */
-  --estado-pendiente: #5f7472;
-  --estado-en-analisis: #b45309;
-  --estado-en-atencion: #2563eb;
-  --estado-en-validacion: #7c3aed;
-  --estado-cerrada: #4d7c0f;
-  --urgente: #c8102e;
+  /* Estados del caso y avisos. Ninguno repite el tono del acento.
+     Pasan 4,5:1 como texto sobre su propio tinte al 13 %, en tarjeta y sobre el fondo de la página */
+  --estado-pendiente: #4e5f5d;
+  --estado-en-analisis: #944407;
+  --estado-en-atencion: #1f53c5;
+  --estado-en-validacion: #6e34d3;
+  --estado-cerrada: #3f660c;
+  --urgente: #b20e29;
 
   /* Vidrio: relleno translúcido, borde claro, línea de pelo oscura por fuera y línea de luz arriba */
   --vidrio: color-mix(in srgb, color-mix(in srgb, #ffffff 94%, var(--acento)) 62%, transparent);

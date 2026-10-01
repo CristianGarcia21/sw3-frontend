@@ -24,6 +24,7 @@ export function Modal({ abierto, onCerrar, titulo, descripcion, children, pie, v
   const { montado, visible } = usePresencia(abierto, 320)
   const hoja = useRef<HTMLDivElement>(null)
   const idTitulo = useId()
+  const idDescripcion = useId()
 
   useEffect(() => {
     if (!abierto) return
@@ -68,6 +69,7 @@ export function Modal({ abierto, onCerrar, titulo, descripcion, children, pie, v
         role={alerta ? 'alertdialog' : 'dialog'}
         aria-modal="true"
         aria-labelledby={idTitulo}
+        aria-describedby={descripcion ? idDescripcion : undefined}
         tabIndex={-1}
         className={`vidrio-grueso relative flex w-full flex-col rounded-hoja text-texto outline-none transition-all duration-500 ease-resorte ${alerta ? 'max-w-80 items-center gap-2 px-5 pt-6 pb-4 text-center' : 'max-w-[480px] gap-3.5 px-5.5 pt-5.5 pb-4.5'} ${visible ? 'blur-none' : 'pointer-events-none scale-[0.94] opacity-0 blur-[8px]'}`}
       >
@@ -76,7 +78,7 @@ export function Modal({ abierto, onCerrar, titulo, descripcion, children, pie, v
           <h2 id={idTitulo} className="text-xl leading-tight font-bold tracking-[-0.016em]">
             {titulo}
           </h2>
-          {descripcion && <p className="mt-1 text-[13px] text-texto-suave">{descripcion}</p>}
+          {descripcion && <p id={idDescripcion} className="mt-1 text-[13px] text-texto-suave">{descripcion}</p>}
         </div>
         {children}
         {pie && <div className={`flex gap-2 ${alerta ? 'mt-2.5 w-full [&>*]:h-9.5 [&>*]:flex-1' : 'justify-end [&>*]:h-9.5'}`}>{pie}</div>}

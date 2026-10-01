@@ -178,12 +178,13 @@ export function Componentes() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <Seccion titulo="Avisos" nota="Cuentan el resultado de una acción. Nacen como una gota, se apilan y se pausan al pasar el mouse. Lanza varios seguidos.">
+          <Seccion titulo="Avisos" nota="Cuentan el resultado de una acción. Se apilan y se pausan con el mouse o el foco. Los de error se quedan hasta cerrarlos.">
             <Fila>
               <Boton onClick={() => avisos.exito('Caso #1043 registrado', 'Quedó en Pendiente y sin agente.', { texto: 'Ver', onClick: () => {} })}>Éxito</Boton>
               <Boton onClick={() => avisos.info('Caso #1037 devuelto', 'Volvió a En atención con Andrés Pérez.')}>Información</Boton>
               <Boton onClick={() => avisos.advertencia('En validación llegó a su límite', 'Hay 2 de 2 casos.')}>Advertencia</Boton>
               <Boton onClick={() => avisos.error('No se pudo asignar', 'Pedro Salas está inactivo (AGENTE_INVALIDO).', { texto: 'Reintentar', onClick: () => {} })}>Error de la API</Boton>
+              <Boton onClick={() => avisos.error('No se pudo registrar el caso', 'La categoría no existe, está inactiva o no pertenece al área enviada.')}>Error largo</Boton>
             </Fila>
           </Seccion>
 

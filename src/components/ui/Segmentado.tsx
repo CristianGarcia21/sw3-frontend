@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 
 interface OpcionSegmento<T> {
   valor: T
@@ -36,10 +36,26 @@ export function Segmentado<T extends string | number>({ opciones, valor, onChang
     return () => observador.disconnect()
   }, [valor, opciones.length])
 
+  // Como un grupo de radios: Tab entra a la opción activa y las flechas cambian la elección
+  function teclas(e: KeyboardEvent<HTMLDivElement>) {
+    const actual = opciones.findIndex((o) => o.valor === valor)
+    const ultimo = opciones.length - 1
+    let destino = -1
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') destino = actual === ultimo ? 0 : actual + 1
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') destino = actual <= 0 ? ultimo : actual - 1
+    else if (e.key === 'Home') destino = 0
+    else if (e.key === 'End') destino = ultimo
+    if (destino < 0) return
+    e.preventDefault()
+    onChange(opciones[destino].valor)
+    grupo.current?.querySelectorAll<HTMLElement>('[role="radio"]')[destino]?.focus()
+  }
+
   return (
     <div
       ref={grupo}
       role="radiogroup"
+      onKeyDown={teclas}
       aria-label={resto['aria-label']}
       className={`relative items-center rounded-full p-0.75 ${completo ? 'flex' : 'inline-flex'} ${variante === 'vidrio' ? 'vidrio' : 'bg-relleno'} ${className}`}
     >
@@ -50,14 +66,17 @@ export function Segmentado<T extends string | number>({ opciones, valor, onChang
           style={{ width: lente.ancho, translate: `${lente.x}px 0`, background: 'var(--lente)', boxShadow: 'var(--lente-sombra)' }}
         />
       )}
-      {opciones.map((opcion) => {
+      {opciones.map((opcion, i) => {
         const activa = opcion.valor === valor
+        // Si ningún valor coincide, la primera opción queda alcanzable con Tab
+        const enfocable = activa || (i === 0 && !opciones.some((o) => o.valor === valor))
         return (
           <button
             key={String(opcion.valor)}
             type="button"
             role="radio"
             aria-checked={activa}
+            tabIndex={enfocable ? 0 : -1}
             onClick={() => onChange(opcion.valor)}
             className={`relative z-10 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-[color,scale] duration-200 active:scale-95 ${completo ? 'flex-1' : ''} ${activa ? 'text-texto' : 'text-texto-suave'}`}
           >

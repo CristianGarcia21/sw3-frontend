@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { usePresencia } from '../../hooks/usePresencia'
 import { CLASES_CONTROL, CLASES_CONTROL_ERROR } from './Campo'
@@ -78,6 +78,13 @@ function ListaBase<T extends string | number>({ opciones, deshabilitada = false,
     if (devolverFoco) boton.current?.focus()
   }
 
+  // Si la lista no cabe hacia la derecha, se corre hasta quedar dentro de la pantalla
+  useLayoutEffect(() => {
+    if (!montado || !posicion || !lista.current) return
+    const sobra = posicion.left + lista.current.offsetWidth - (window.innerWidth - 8)
+    lista.current.style.left = `${sobra > 0 ? Math.max(8, posicion.left - sobra) : posicion.left}px`
+  }, [montado, posicion])
+
   // Al abrir, el foco va a la opción elegida o a la primera que se pueda elegir
   useEffect(() => {
     if (!visible) return
@@ -121,7 +128,11 @@ function ListaBase<T extends string | number>({ opciones, deshabilitada = false,
       // Que no cierre también el modal que la contiene
       e.stopPropagation()
       cerrar(true)
-    } else if (e.key === 'Tab') cerrar()
+    } else if (e.key === 'Tab') {
+      // La lista vive al final del <body>: sin esto el foco saltaría fuera del modal que la contiene
+      e.preventDefault()
+      cerrar(true)
+    }
   }
 
   return (
@@ -135,6 +146,7 @@ function ListaBase<T extends string | number>({ opciones, deshabilitada = false,
         aria-expanded={abierta}
         aria-invalid={invalida || undefined}
         aria-label={resto['aria-label']}
+        aria-describedby={id ? `${id}-nota` : undefined}
         onClick={() => (abierta ? cerrar() : abrir())}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {

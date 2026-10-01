@@ -7,7 +7,7 @@ const VARIANTES: Record<Variante, string> = {
   primario: 'bg-acento text-sobre-acento hover:brightness-110',
   secundario: 'bg-relleno text-texto hover:bg-relleno-fuerte',
   texto: 'text-acento hover:bg-relleno',
-  destructivo: 'bg-urgente/12 text-urgente hover:bg-urgente/18',
+  destructivo: 'bg-urgente/12 text-urgente hover:bg-urgente/16',
   vidrio: 'vidrio text-texto',
   'vidrio-acento': 'vidrio-acento',
 }

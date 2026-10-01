@@ -8,7 +8,7 @@ export const CLASES_CONTROL_ERROR = 'border-urgente ring-4 ring-urgente/15 focus
 
 interface PropsCampo {
   etiqueta: string
-  /** id del control, para que la etiqueta lo enfoque al tocarla */
+  /** id del control, para que la etiqueta lo enfoque al tocarla. La línea de ayuda o error queda con el id `${htmlFor}-nota` */
   htmlFor?: string
   /** Texto de ayuda. Se reemplaza por el error cuando lo hay */
   ayuda?: string
@@ -21,6 +21,7 @@ interface PropsCampo {
 
 /** Etiqueta, control y línea de ayuda o error. Envuelve cualquier control: texto, lista desplegable, segmentado */
 export function Campo({ etiqueta, htmlFor, ayuda, error, contador, children }: PropsCampo) {
+  const idNota = htmlFor ? `${htmlFor}-nota` : undefined
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
       <label htmlFor={htmlFor} className="text-[12.5px] font-semibold">
@@ -30,11 +31,11 @@ export function Campo({ etiqueta, htmlFor, ayuda, error, contador, children }: P
       {(error || ayuda || contador) && (
         <div className="flex min-h-[18px] justify-between gap-2 text-xs text-texto-suave">
           {error ? (
-            <span role="alert" className="text-urgente">
+            <span id={idNota} role="alert" className="text-urgente">
               {error}
             </span>
           ) : (
-            <span>{ayuda}</span>
+            <span id={idNota}>{ayuda}</span>
           )}
           {contador && <span className="cifras">{contador}</span>}
         </div>
@@ -55,7 +56,7 @@ export function CampoTexto({ etiqueta, ayuda, error, conContador, className = ''
   const contador = conContador && resto.maxLength ? `${String(resto.value ?? '').trim().length}/${resto.maxLength}` : undefined
   return (
     <Campo etiqueta={etiqueta} htmlFor={idControl} ayuda={ayuda} error={error} contador={contador}>
-      <input id={idControl} aria-invalid={!!error} className={`${CLASES_CONTROL} ${error ? CLASES_CONTROL_ERROR : ''} ${className}`} {...resto} />
+      <input id={idControl} aria-invalid={!!error} aria-describedby={error || ayuda ? `${idControl}-nota` : undefined} className={`${CLASES_CONTROL} ${error ? CLASES_CONTROL_ERROR : ''} ${className}`} {...resto} />
     </Campo>
   )
 }
@@ -68,7 +69,7 @@ export function CampoArea({ etiqueta, ayuda, error, conContador, className = '',
   const contador = conContador ? (resto.maxLength ? `${escritos}/${resto.maxLength}` : String(escritos)) : undefined
   return (
     <Campo etiqueta={etiqueta} htmlFor={idControl} ayuda={ayuda} error={error} contador={contador}>
-      <textarea id={idControl} aria-invalid={!!error} className={`min-h-[88px] resize-y ${CLASES_CONTROL} ${error ? CLASES_CONTROL_ERROR : ''} ${className}`} {...resto} />
+      <textarea id={idControl} aria-invalid={!!error} aria-describedby={error || ayuda ? `${idControl}-nota` : undefined} className={`min-h-[88px] resize-y ${CLASES_CONTROL} ${error ? CLASES_CONTROL_ERROR : ''} ${className}`} {...resto} />
     </Campo>
   )
 }

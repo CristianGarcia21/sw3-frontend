@@ -30,19 +30,19 @@ Están definidos en [src/index.css](../src/index.css) y cambian solos entre clar
 | `text-sobre-acento` | Texto encima del acento | `#FFFFFF` | `#092635` |
 | `bg-tinte` | Fondo de lo seleccionado (menú activo, fila elegida) | verde agua suave | verde suave |
 | `bg-relleno` / `bg-relleno-fuerte` | Fondo de campos y botones secundarios, y su hover | texto al 5,5 % / 9 % | igual |
-| `text-urgente` | Prioridad P1, errores y acciones destructivas | `#C8102E` | `#FF7A7A` |
+| `text-urgente` | Prioridad P1, errores y acciones destructivas | `#B20E29` | `#FF7A7A` |
 
 Colores de estado del caso. No se usan para nada más:
 
 | Estado | Token | Claro | Oscuro |
 |---|---|---|---|
-| Pendiente | `estado-pendiente` | `#5F7472` | `#94AAA5` |
-| En análisis | `estado-en-analisis` | `#B45309` | `#FBBF24` |
-| En atención | `estado-en-atencion` | `#2563EB` | `#60A5FA` |
-| En validación | `estado-en-validacion` | `#7C3AED` | `#B39DFA` |
-| Cerrada | `estado-cerrada` | `#4D7C0F` | `#A3E635` |
+| Pendiente | `estado-pendiente` | `#4E5F5D` | `#94AAA5` |
+| En análisis | `estado-en-analisis` | `#944407` | `#FBBF24` |
+| En atención | `estado-en-atencion` | `#1F53C5` | `#60A5FA` |
+| En validación | `estado-en-validacion` | `#6E34D3` | `#B39DFA` |
+| Cerrada | `estado-cerrada` | `#3F660C` | `#A3E635` |
 
-Todos los colores de texto pasan contraste AA (4,5:1) sobre su superficie en los dos temas.
+Todos los colores de texto pasan contraste AA (4,5:1) en los dos temas. Los de estado y `urgente` lo pasan también como texto sobre su propio tinte (la píldora de `EstadoBadge`, el botón destructivo), en una tarjeta y sobre el fondo de la página. Si cambias un tono o subes el tinte por encima del 13 %, vuelve a medirlo.
 
 Para mostrar un estado o una prioridad usa `<EstadoBadge>` y `<PrioridadBadge>`. Para gráficos (Recharts) usa `COLOR_ESTADO` y `COLOR_PRIORIDAD` de [src/utils/colores.ts](../src/utils/colores.ts).
 
@@ -138,6 +138,8 @@ try {
 Hay cuatro: `exito`, `info`, `advertencia` y `error`. El tercer parámetro es un botón opcional: `{ texto: 'Ver', onClick: () => navigate(...) }`.
 
 - El título dice qué pasó, en pasado y con el número del caso: "Caso #12 asignado".
+- Los avisos se van solos a los 5 segundos, menos los de error: esos se quedan hasta que la persona los cierra.
+- Si el texto es largo, el aviso crece hasta tres líneas. Aun así, sé breve.
 - Si algo falla al **cargar** una pantalla, usa `Mensaje` con botón de reintentar, no un aviso.
 
 ### Modal
@@ -225,7 +227,7 @@ Antes de pedir revisión de un PR, mira tu pantalla en los dos temas.
 
 - Todo se puede usar con teclado. El foco se ve con un anillo del color de acento; no lo quites.
 - Un botón que solo tiene ícono lleva `aria-label`.
-- Cada campo tiene su etiqueta visible (`Campo`, `CampoTexto`, `CampoArea` ya la ponen).
+- Cada campo tiene su etiqueta visible (`Campo`, `CampoTexto`, `CampoArea` ya la ponen). La ayuda y el error quedan enlazados al control para los lectores de pantalla; con `Campo` y `ListaDesplegable`, pasa el mismo `id` en `htmlFor` y en `id`.
 - El color nunca es la única señal: los estados llevan punto de color y texto.
 
 ## Si programas con IA
