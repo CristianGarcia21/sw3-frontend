@@ -1,17 +1,22 @@
+import type { CSSProperties } from 'react'
 import type { EstadoCaso } from '../types'
+import { COLOR_ESTADO } from '../utils/colores'
 import { ETIQUETA_ESTADO } from '../utils/etiquetas'
 
-const COLORES: Record<EstadoCaso, string> = {
-  PENDIENTE: 'bg-slate-100 text-slate-700 ring-slate-300',
-  EN_ANALISIS: 'bg-amber-50 text-amber-800 ring-amber-300',
-  EN_ATENCION: 'bg-sky-50 text-sky-800 ring-sky-300',
-  EN_VALIDACION: 'bg-violet-50 text-violet-800 ring-violet-300',
-  CERRADA: 'bg-emerald-50 text-emerald-800 ring-emerald-300',
+interface Props {
+  estado: EstadoCaso
+  /** 'suave' es la píldora de color para tablas y detalles; 'punto' es más discreta, para listas densas */
+  variante?: 'suave' | 'punto'
 }
 
-export function EstadoBadge({ estado }: { estado: EstadoCaso }) {
+export function EstadoBadge({ estado, variante = 'suave' }: Props) {
+  const color = { '--tono': COLOR_ESTADO[estado] } as CSSProperties
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ring-inset ${COLORES[estado]}`}>
+    <span
+      style={color}
+      className={`inline-flex items-center gap-1.5 text-xs font-medium whitespace-nowrap ${variante === 'suave' ? 'rounded-full bg-(--tono)/13 py-0.75 pr-2.5 pl-2 text-(--tono)' : ''}`}
+    >
+      <span className="size-1.75 shrink-0 rounded-full bg-(--tono)" />
       {ETIQUETA_ESTADO[estado]}
     </span>
   )

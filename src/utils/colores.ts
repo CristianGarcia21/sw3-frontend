@@ -1,8 +1,17 @@
-import type { Prioridad } from '../types'
+import type { EstadoCaso, Prioridad } from '../types'
 
-// Colores de prioridad para gráficos (HU-10), los mismos tonos de PrioridadBadge
+// Colores para gráficos (HU-10) y puntos de estado. Apuntan a los tokens de index.css, así cambian solos con el tema
+
+export const COLOR_ESTADO: Record<EstadoCaso, string> = {
+  PENDIENTE: 'var(--estado-pendiente)',
+  EN_ANALISIS: 'var(--estado-en-analisis)',
+  EN_ATENCION: 'var(--estado-en-atencion)',
+  EN_VALIDACION: 'var(--estado-en-validacion)',
+  CERRADA: 'var(--estado-cerrada)',
+}
+
 export const COLOR_PRIORIDAD: Record<Prioridad, string> = {
-  P1: '#dc2626',
-  P2: '#d97706',
-  P3: '#64748b',
+  P1: 'var(--urgente)',
+  P2: 'var(--estado-en-analisis)',
+  P3: 'var(--estado-pendiente)',
 }

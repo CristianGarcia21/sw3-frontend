@@ -1,8 +1,8 @@
 export function EnConstruccion({ titulo, issue }: { titulo: string; issue?: string }) {
   return (
     <section>
-      <h1 className="text-2xl font-semibold text-slate-900">{titulo}</h1>
-      <p className="mt-2 text-slate-500">En construcción{issue ? ` (${issue})` : ''}.</p>
+      <h1 className="text-[34px] leading-tight font-bold tracking-[-0.028em]">{titulo}</h1>
+      <p className="mt-1 text-texto-suave">En construcción{issue ? ` (${issue})` : ''}.</p>
     </section>
   )
 }
