@@ -113,7 +113,17 @@ El frontend se encarga de mostrarlos con texto legible ("En análisis", "Solicit
 
 ### GET /casos
 
-Query params opcionales y combinables: `estado`, `tipo`, `areaId`, `categoriaId`, `prioridad`, `solicitanteId`, `agenteId`, `q` (texto en título), `orden` (`fecha_desc` por defecto, `prioridad`).
+Query params opcionales y combinables:
+- `abiertos`: booleano (`true` excluye los casos en estado `CERRADA`).
+- `agenteId`: entero positivo (filtra los casos asignados a ese agente).
+- `sinAgente`: booleano (`true` filtra los casos sin agente asignado).
+- `solicitanteId`: entero positivo (filtra por solicitante).
+- `orden`: `fecha_desc` (por defecto) o `prioridad` (ordena por P1, P2, P3 y dentro del mismo nivel el más antiguo primero, CP-13).
+- Filtros adicionales para historias posteriores (#41): `estado`, `tipo`, `areaId`, `categoriaId`, `prioridad`, `q`.
+
+Pestañas de la bandeja del agente (HU-03):
+- **Pendientes:** `GET /api/casos?abiertos=true&orden=prioridad`
+- **Asignados a mí:** `GET /api/casos?abiertos=true&agenteId=<miId>&orden=prioridad`
 
 Si el usuario actual es solicitante, el backend ignora `solicitanteId` y siempre filtra por él (RN-20).
 
