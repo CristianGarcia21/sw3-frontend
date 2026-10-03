@@ -4,6 +4,7 @@ import { RutaConRol } from './components/RutaConRol'
 import { Componentes } from './pages/Componentes'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { Inicio } from './pages/Inicio'
+import { MisCasos } from './pages/MisCasos'
 import { NoEncontrada } from './pages/NoEncontrada'
 import { RUTAS } from './utils/navegacion'
 
@@ -26,7 +27,7 @@ export default function App() {
           path={RUTAS.misCasos}
           element={
             <RutaConRol roles={['SOLICITANTE']}>
-              <EnConstruccion titulo="Mis casos" issue="HU-02 · #12" />
+              <MisCasos />
             </RutaConRol>
           }
         />
