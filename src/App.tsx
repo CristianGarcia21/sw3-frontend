@@ -6,6 +6,7 @@ import { EnConstruccion } from './pages/EnConstruccion'
 import { Inicio } from './pages/Inicio'
 import { MisCasos } from './pages/MisCasos'
 import { NoEncontrada } from './pages/NoEncontrada'
+import { RegistrarCaso } from './pages/RegistrarCaso'
 import { RUTAS } from './utils/navegacion'
 
 // Cada tarea reemplaza su <EnConstruccion> por la pantalla real
@@ -19,7 +20,7 @@ export default function App() {
           path={RUTAS.registrarCaso}
           element={
             <RutaConRol roles={['SOLICITANTE']}>
-              <EnConstruccion titulo="Registrar caso" issue="HU-01 · #7" />
+              <RegistrarCaso />
             </RutaConRol>
           }
         />

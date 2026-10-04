@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import type { FocusEventHandler } from 'react'
 import { createPortal } from 'react-dom'
 import { usePresencia } from '../../hooks/usePresencia'
 import { CLASES_CONTROL, CLASES_CONTROL_ERROR } from './Campo'
@@ -25,6 +26,7 @@ interface PropsComunes<T> {
   id?: string
   'aria-label'?: string
   className?: string
+  onBlur?: FocusEventHandler<HTMLButtonElement>
 }
 
 interface PropsBase<T> extends PropsComunes<T> {
@@ -56,7 +58,7 @@ const CLASES_BOTON: Record<Variante, string> = {
 }
 
 /** Botón y lista en vidrio. La usan ListaDesplegable y FiltroMultiple; no se usa directo */
-function ListaBase<T extends string | number>({ opciones, deshabilitada = false, id, className = '', variante, multiple, elegidas, onElegir, invalida = false, children, resaltado = false, ...resto }: PropsBase<T>) {
+function ListaBase<T extends string | number>({ opciones, deshabilitada = false, id, className = '', variante, multiple, elegidas, onElegir, invalida = false, children, resaltado = false, onBlur, ...resto }: PropsBase<T>) {
   const [abierta, setAbierta] = useState(false)
   const [posicion, setPosicion] = useState<Posicion | null>(null)
   const boton = useRef<HTMLButtonElement>(null)
@@ -148,6 +150,10 @@ function ListaBase<T extends string | number>({ opciones, deshabilitada = false,
         aria-label={resto['aria-label']}
         aria-describedby={id ? `${id}-nota` : undefined}
         onClick={() => (abierta ? cerrar() : abrir())}
+        onBlur={(e) => {
+          if (e.relatedTarget instanceof Node && lista.current?.contains(e.relatedTarget)) return
+          onBlur?.(e)
+        }}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
             e.preventDefault()
