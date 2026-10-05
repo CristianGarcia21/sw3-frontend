@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router'
 import { Layout } from './components/layout/Layout'
 import { RutaConRol } from './components/RutaConRol'
+import { Bandeja } from './pages/Bandeja'
 import { Componentes } from './pages/Componentes'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { Inicio } from './pages/Inicio'
@@ -43,7 +44,7 @@ export default function App() {
           path={RUTAS.bandeja}
           element={
             <RutaConRol roles={['AGENTE', 'ADMINISTRADOR']}>
-              <EnConstruccion titulo="Bandeja de casos" issue="HU-03 · #16" />
+              <Bandeja />
             </RutaConRol>
           }
         />
