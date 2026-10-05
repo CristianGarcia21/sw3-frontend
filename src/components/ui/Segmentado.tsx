@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useLayoutEffect, useRef, useState, type FocusEventHandler, type KeyboardEvent } from 'react'
 
 interface OpcionSegmento<T> {
   valor: T
@@ -9,9 +9,13 @@ interface OpcionSegmento<T> {
 
 interface Props<T> {
   opciones: OpcionSegmento<T>[]
-  valor: T
+  valor: T | null
   onChange: (valor: T) => void
   'aria-label': string
+  id?: string
+  'aria-describedby'?: string
+  'aria-invalid'?: boolean
+  onBlur?: FocusEventHandler<HTMLDivElement>
   /** 'solido' dentro de formularios y tarjetas; 'vidrio' cuando flota en una barra sobre el contenido */
   variante?: 'solido' | 'vidrio'
   /** Ocupa todo el ancho y reparte las opciones por igual */
@@ -27,7 +31,7 @@ export function Segmentado<T extends string | number>({ opciones, valor, onChang
   useLayoutEffect(() => {
     const medir = () => {
       const activo = grupo.current?.querySelector<HTMLElement>('[aria-checked="true"]')
-      if (activo) setLente({ x: activo.offsetLeft, ancho: activo.offsetWidth })
+      setLente(activo ? { x: activo.offsetLeft, ancho: activo.offsetWidth } : null)
     }
     medir()
     if (!grupo.current) return
@@ -54,9 +58,16 @@ export function Segmentado<T extends string | number>({ opciones, valor, onChang
   return (
     <div
       ref={grupo}
+      id={resto.id}
       role="radiogroup"
       onKeyDown={teclas}
+      onBlur={(e) => {
+        if (e.relatedTarget instanceof Node && grupo.current?.contains(e.relatedTarget)) return
+        resto.onBlur?.(e)
+      }}
       aria-label={resto['aria-label']}
+      aria-describedby={resto['aria-describedby']}
+      aria-invalid={resto['aria-invalid'] || undefined}
       className={`relative items-center rounded-full p-0.75 ${completo ? 'flex' : 'inline-flex'} ${variante === 'vidrio' ? 'vidrio' : 'bg-relleno'} ${className}`}
     >
       {lente && (
@@ -78,7 +89,7 @@ export function Segmentado<T extends string | number>({ opciones, valor, onChang
             aria-checked={activa}
             tabIndex={enfocable ? 0 : -1}
             onClick={() => onChange(opcion.valor)}
-            className={`relative z-10 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-[color,scale] duration-200 active:scale-95 ${completo ? 'flex-1' : ''} ${activa ? 'text-texto' : 'text-texto-suave'}`}
+            className={`relative z-10 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-[color,scale] duration-200 active:scale-95 focus-visible:ring-4 focus-visible:ring-tinte ${completo ? 'flex-1' : ''} ${activa ? 'text-texto' : 'text-texto-suave'}`}
           >
             {opcion.color && <span className="size-1.75 rounded-full" style={{ background: opcion.color }} />}
             {opcion.texto}

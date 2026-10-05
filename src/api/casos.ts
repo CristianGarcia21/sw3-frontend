@@ -1,19 +1,13 @@
-import type { Caso, EstadoCaso, Prioridad, TipoCaso } from '../types'
+import type { Caso, EstadoCaso, NuevoCaso } from '../types'
 import { api } from './client'
 
-export interface NuevoCaso {
-  tipo: TipoCaso
-  titulo: string
-  descripcion: string
-  prioridad: Prioridad
-  areaId: number
-  categoriaId: number
-}
+export type { NuevoCaso } from '../types'
 
 /** POST /casos (solo SOLICITANTE) */
 export function registrarCaso(datos: NuevoCaso) {
   return api<Caso>('/casos', { method: 'POST', body: datos })
 }
+
 
 /** Parámetros de GET /casos. Cada tarea agrega los que implemente el backend (ver docs/03-api.md) */
 export interface FiltrosCasos {

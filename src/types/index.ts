@@ -76,6 +76,15 @@ export interface Caso {
   fechaCierre: string | null
 }
 
+export interface NuevoCaso {
+  tipo: TipoCaso
+  titulo: string
+  descripcion: string
+  prioridad: Prioridad
+  areaId: number
+  categoriaId: number
+}
+
 /** Respuesta de GET /casos/:id */
 export interface CasoDetalle extends Caso {
   atenciones: Atencion[]
