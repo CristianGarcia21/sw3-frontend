@@ -51,3 +51,20 @@ export function formatearFecha(fecha: string | null | undefined): string {
   const d = new Date(fecha)
   return Number.isNaN(d.getTime()) ? '—' : formatoFecha.format(d)
 }
+
+// Corto para minutos y horas ("hace 3 h") y largo para días ("hace 2 días"), que en corto queda "hace 2 d"
+const relativoCorto = new Intl.RelativeTimeFormat('es', { numeric: 'always', style: 'short' })
+const relativoLargo = new Intl.RelativeTimeFormat('es', { numeric: 'always', style: 'long' })
+
+/** "hace 3 h", "hace 2 días" — cuánto tiempo pasó desde la fecha ISO que envía la API */
+export function formatearAntiguedad(fecha: string | null | undefined, ahora: number = Date.now()): string {
+  if (!fecha) return '—'
+  const d = new Date(fecha).getTime()
+  if (Number.isNaN(d)) return '—'
+  const minutos = Math.max(0, Math.floor((ahora - d) / 60_000))
+  if (minutos < 1) return 'ahora'
+  if (minutos < 60) return relativoCorto.format(-minutos, 'minute')
+  const horas = Math.floor(minutos / 60)
+  if (horas < 24) return relativoCorto.format(-horas, 'hour')
+  return relativoLargo.format(-Math.floor(horas / 24), 'day')
+}
