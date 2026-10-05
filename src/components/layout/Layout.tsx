@@ -43,7 +43,7 @@ export function Layout() {
           <Segmentado
             aria-label="Tema"
             completo
-            className="max-md:ml-auto max-md:w-40"
+            className="max-md:ml-auto"
             valor={tema}
             onChange={cambiar}
             opciones={[
