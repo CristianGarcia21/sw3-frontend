@@ -8,7 +8,6 @@ export function registrarCaso(datos: NuevoCaso) {
   return api<Caso>('/casos', { method: 'POST', body: datos })
 }
 
-export const crearCaso = registrarCaso
 
 /** Parámetros de GET /casos. Cada tarea agrega los que implemente el backend (ver docs/03-api.md) */
 export interface FiltrosCasos {

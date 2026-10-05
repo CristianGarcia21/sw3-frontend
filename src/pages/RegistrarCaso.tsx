@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { ApiError } from '../api/client'
-import { crearCaso } from '../api/casos'
+import { registrarCaso } from '../api/casos'
 import { listarAreas, listarCategorias } from '../api/catalogos'
 import { Cargando } from '../components/Cargando'
 import { Mensaje } from '../components/Mensaje'
@@ -204,7 +204,7 @@ export function RegistrarCaso() {
 
     setEnviando(true)
     try {
-      const caso = await crearCaso({
+      const caso = await registrarCaso({
         tipo,
         titulo: titulo.trim(),
         descripcion: descripcion.trim(),
