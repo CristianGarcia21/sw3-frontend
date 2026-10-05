@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { ApiError } from '../api/client'
 import { crearCaso } from '../api/casos'
-import { getAreas, getCategorias } from '../api/catalogos'
+import { listarAreas, listarCategorias } from '../api/catalogos'
 import { Cargando } from '../components/Cargando'
 import { Mensaje } from '../components/Mensaje'
 import { Boton, Campo, CampoArea, CampoTexto, EstadoVacio, ListaDesplegable, Segmentado, Tarjeta } from '../components/ui'
@@ -60,7 +60,7 @@ export function RegistrarCaso() {
   useEffect(() => {
     let cancelado = false
 
-    getAreas()
+    listarAreas()
       .then((lista) => {
         if (!cancelado) setAreas(lista)
       })
@@ -83,7 +83,10 @@ export function RegistrarCaso() {
 
     let cancelado = false
 
-    getCategorias(areaId)
+   listarCategorias({
+  areaId,
+  activa: true,
+})
       .then((lista) => {
         if (!cancelado) setCategorias(lista)
       })
