@@ -52,6 +52,6 @@ Cada defecto también existe como issue con la etiqueta `defecto`. Esta tabla es
 
 | ID | Issue | Descripción | Pasos | Resultado esperado | Resultado obtenido | Prioridad | Estado | Sprint | Fecha |
 |---|---|---|---|---|---|---|---|---|---|
-| | | | | | | | | | |
+| DEF-01 | #20 | El merge de #20 (reclasificación) con HU-08 (historial) mezcló `reclasificarCaso` y `verHistorial` y dejó sin cerrar `reclasificar`; `development` del backend no compilaba | Actualizar `development` del backend (`d5815a9`) y ejecutar `npm run build` o `npm run dev` | El backend compila y arranca; `PATCH /casos/{id}/clasificacion` y `GET /casos/{id}/historial` responden según el contrato | Error de sintaxis TypeScript; el backend no arranca | Crítico | En corrección (PR backend #24) | 2 | 6/10/2026 |
 
 Prioridad del defecto: **Crítico** (rompe el flujo principal o pierde datos), **Alto** (incumple una regla de negocio), **Medio** (funciona con un rodeo), **Bajo** (visual o texto).
