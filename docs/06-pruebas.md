@@ -42,7 +42,9 @@ Una fila por ejecución. Si se vuelve a probar después de corregir un defecto, 
 
 | Fecha | ID | Sprint | Ejecutó | Resultado obtenido | Estado (Pasó/Falló) | Defecto |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| 2026-10-05 | CP-01 (parte bandeja) | 1 | Tania Botina | Como Laura se registró el caso #1 (Incidente, Red y conectividad / Wi-Fi, P2). Como Andrés, en Bandeja › Pendientes aparece #1 con estado Pendiente y agente "Sin asignar". La API (`GET /casos?abiertos=true&orden=prioridad`) devuelve lo mismo, con `agente: null` | Pasó | – |
+| 2026-10-05 | HU-03 extra (ir al detalle) | 1 | Tania Botina | Como Andrés, el clic en la fila del caso #1 abre `/casos/1`, y la flecha atrás del navegador vuelve a la bandeja. La pantalla de detalle aún muestra "En construcción (HU-05 · #21)"; se verificó solo la navegación, que es lo que pide HU-03 | Pasó | – |
+| 2026-10-05 | CP-13 | 1 | Tania Botina | BD limpia (`truncate caso restart identity cascade`). Como Laura se crearon, en orden, #1 P3, #2 P1, #3 P2, #4 P1 y #5 P1; el #5 se cerró por SQL (`estado='CERRADA'`, `fecha_cierre=now()`), porque el proyecto no tiene Prisma Studio y `PATCH /estado` no acepta CERRADA. Como Andrés, Bandeja › Pendientes muestra #2 (P1), #4 (P1), #3 (P2), #1 (P3): P1 más antiguo primero, y el #5 cerrado no aparece. La API devuelve el mismo orden | Pasó | – |
 
 ## Registro de defectos
 
