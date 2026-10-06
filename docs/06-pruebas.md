@@ -42,7 +42,9 @@ Una fila por ejecución. Si se vuelve a probar después de corregir un defecto, 
 
 | Fecha | ID | Sprint | Ejecutó | Resultado obtenido | Estado (Pasó/Falló) | Defecto |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| 2026-10-05 | CP-12 | 1 | Valentina Galvis | Laura registró 2 casos (#6 y #7) y Carlos 1. Mis casos como Laura muestra solo sus 2 casos; como Carlos, solo el suyo | Pasó | – |
+| 2026-10-05 | CP-12 (extra: RN-20 con curl) | 1 | Valentina Galvis | Con X-Usuario-Id: 3 (Laura) y GET /casos?solicitanteId=4 solo devolvió los casos #6 y #7, ambos de Laura | Pasó | – |
+| 2026-10-05 | CP-12 (extra: solicitante sin casos) | 1 | Valentina Galvis | Carlos sin casos ve el mensaje de vacío con el enlace a registrar caso | Pasó | – |
 
 ## Registro de defectos
 
@@ -51,5 +53,8 @@ Cada defecto también existe como issue con la etiqueta `defecto`. Esta tabla es
 | ID | Issue | Descripción | Pasos | Resultado esperado | Resultado obtenido | Prioridad | Estado | Sprint | Fecha |
 |---|---|---|---|---|---|---|---|---|---|
 | | | | | | | | | | |
+
+
+
 
 Prioridad del defecto: **Crítico** (rompe el flujo principal o pierde datos), **Alto** (incumple una regla de negocio), **Medio** (funciona con un rodeo), **Bajo** (visual o texto).
