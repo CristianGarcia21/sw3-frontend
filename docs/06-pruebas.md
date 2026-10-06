@@ -57,7 +57,4 @@ Cada defecto también existe como issue con la etiqueta `defecto`. Esta tabla es
 |---|---|---|---|---|---|---|---|---|---|
 | | | | | | | | | | |
 
-
-
-
 Prioridad del defecto: **Crítico** (rompe el flujo principal o pierde datos), **Alto** (incumple una regla de negocio), **Medio** (funciona con un rodeo), **Bajo** (visual o texto).
