@@ -121,7 +121,7 @@ export function DetalleCaso() {
       <DatosCaso caso={resultadoActual} />
       <AccionesEstado caso={resultadoActual} onCasoActualizado={actualizarCaso} />
       <PanelAsignacion />
-      <PanelReclasificacion />
+      <PanelReclasificacion caso={resultadoActual} onCasoActualizado={actualizarCaso} />
       <PanelAtencion />
       <PanelValidacion />
       <LineaTiempo />
