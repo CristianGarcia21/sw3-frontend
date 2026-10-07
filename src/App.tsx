@@ -3,6 +3,7 @@ import { Layout } from './components/layout/Layout'
 import { RutaConRol } from './components/RutaConRol'
 import { Bandeja } from './pages/Bandeja'
 import { Componentes } from './pages/Componentes'
+import { DetalleCaso } from './pages/DetalleCaso'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { Inicio } from './pages/Inicio'
 import { MisCasos } from './pages/MisCasos'
@@ -53,7 +54,7 @@ export default function App() {
           path={RUTAS.detalleCaso}
           element={
             <RutaConRol roles={['AGENTE', 'VALIDADOR', 'ADMINISTRADOR']}>
-              <EnConstruccion titulo="Detalle del caso" issue="HU-05 · #21" />
+              <DetalleCaso />
             </RutaConRol>
           }
         />
