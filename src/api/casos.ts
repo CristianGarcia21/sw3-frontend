@@ -38,10 +38,19 @@ export interface FiltrosCasos {
   abiertos?: boolean
   agenteId?: number
   sinAgente?: boolean
-  estado?: EstadoCaso
+  /** Varios valores viajan separados por coma (estado=PENDIENTE,EN_ANALISIS) */
+  estado?: EstadoCaso[]
+  tipo?: TipoCaso[]
+  prioridad?: Prioridad[]
+  areaId?: number
+  categoriaId?: number
+  /** Texto que se busca en el título */
+  q?: string
 }
 
 /** GET /casos: a un SOLICITANTE el backend solo le devuelve sus casos */
 export function listarCasos(filtros: FiltrosCasos = {}) {
-  return api<Caso[]>('/casos', { query: { ...filtros } })
+  const query: Record<string, string | number | boolean | undefined> = {}
+  for (const [clave, valor] of Object.entries(filtros)) query[clave] = Array.isArray(valor) ? valor.join(',') : valor
+  return api<Caso[]>('/casos', { query })
 }

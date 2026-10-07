@@ -49,6 +49,7 @@ export function Componentes() {
   const [agente, setAgente] = useState<number | null>(4)
   const [filtroEstado, setFiltroEstado] = useState<EstadoCaso[]>(['EN_ATENCION'])
   const [filtroPrioridad, setFiltroPrioridad] = useState<Prioridad[]>([])
+  const [filtroArea, setFiltroArea] = useState<string | null>(null)
   const [tipo, setTipo] = useState<TipoCaso>('INCIDENTE')
   const [prioridad, setPrioridad] = useState<Prioridad>('P2')
   const [vista, setVista] = useState('todos')
@@ -157,7 +158,7 @@ export function Componentes() {
             </div>
           </Seccion>
 
-          <Seccion titulo="Filtros" nota="Cápsulas con selección múltiple. En vidrio cuando flotan en una barra sobre el contenido.">
+          <Seccion titulo="Filtros" nota="Cápsulas con selección múltiple (FiltroMultiple) o de una sola opción (ListaDesplegable con variante cápsula). En vidrio cuando flotan solas; sólidas dentro de una barra de vidrio.">
             <div className="flex flex-wrap gap-2 rounded-2xl bg-fondo p-2.5">
               <FiltroMultiple
                 variante="vidrio"
@@ -172,6 +173,16 @@ export function Componentes() {
                 opciones={PRIORIDADES.map((p) => ({ valor: p, texto: ETIQUETA_PRIORIDAD[p] }))}
                 valor={filtroPrioridad}
                 onChange={setFiltroPrioridad}
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <ListaDesplegable
+                variante="capsula"
+                aria-label="Área"
+                opciones={Object.keys(AREAS).map((a) => ({ valor: a, texto: a }))}
+                valor={filtroArea}
+                onChange={setFiltroArea}
+                contenido={<span className="truncate">{filtroArea ? `Área: ${filtroArea}` : 'Área'}</span>}
               />
             </div>
           </Seccion>

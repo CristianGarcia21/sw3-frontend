@@ -10,9 +10,11 @@ import { useCasos } from '../hooks/useCasos'
 import { useUsuarioActual } from '../hooks/useUsuarioActual'
 import type { Caso } from '../types'
 import { ETIQUETA_TIPO, formatearAntiguedad, formatearFecha } from '../utils/etiquetas'
+import { aConsulta, hayFiltros, leerFiltros, limpiarFiltros } from '../utils/filtrosBandeja'
 import { RUTAS } from '../utils/navegacion'
 
-type Vista = 'pendientes' | 'mios'
+// 'todos' solo para el administrador: incluye los cerrados (HU-09)
+type Vista = 'pendientes' | 'mios' | 'todos'
 
 const COLUMNAS = ['ID', 'Título', 'Tipo', 'Área / Categoría', 'Prioridad', 'Estado', 'Solicitante', 'Agente', 'Antigüedad']
 
@@ -25,10 +27,18 @@ export function Bandeja() {
   const esAgente = usuario?.rol === 'AGENTE'
   // La pestaña va en la URL (?vista=mios) para que se conserve al volver del detalle
   const [parametros, setParametros] = useSearchParams()
-  const vista: Vista = esAgente && parametros.get('vista') === 'mios' ? 'mios' : 'pendientes'
+  const vistaUrl = parametros.get('vista')
+  let vista: Vista = 'pendientes'
+  if (esAgente && vistaUrl === 'mios') vista = 'mios'
+  else if (!esAgente && vistaUrl === 'todos') vista = 'todos'
 
-  const filtros: FiltrosCasos = vista === 'mios' ? { abiertos: true, agenteId: usuario?.id, orden: 'prioridad' } : { abiertos: true, orden: 'prioridad' }
-  const { casos, error, actualizando, recargar } = useCasos(filtros)
+  // Los filtros de la barra (HU-09) se suman a la pestaña activa
+  const filtrosUrl = leerFiltros(parametros)
+  const conFiltros = hayFiltros(filtrosUrl)
+  const pestana: FiltrosCasos = { orden: 'prioridad' }
+  if (vista !== 'todos') pestana.abiertos = true
+  if (vista === 'mios') pestana.agenteId = usuario?.id
+  const { casos, error, actualizando, recargar } = useCasos({ ...pestana, ...aConsulta(filtrosUrl) })
 
   // La antigüedad se recalcula cada minuto sin volver a pedir los casos
   const [ahora, setAhora] = useState(() => Date.now())
@@ -41,19 +51,27 @@ export function Bandeja() {
     setParametros(
       (actuales) => {
         const siguientes = new URLSearchParams(actuales)
-        if (nueva === 'mios') siguientes.set('vista', 'mios')
-        else siguientes.delete('vista')
+        if (nueva === 'pendientes') siguientes.delete('vista')
+        else siguientes.set('vista', nueva)
         return siguientes
       },
       { replace: true },
     )
   }
 
-  let resumen = vista === 'mios' ? 'Los casos abiertos que tienes a cargo.' : 'Los casos que no están cerrados, lo más urgente primero.'
-  if (casos && casos.length > 0) {
+  function limpiar() {
+    setParametros((actuales) => limpiarFiltros(actuales), { replace: true })
+  }
+
+  let resumen = 'Los casos que no están cerrados, lo más urgente primero.'
+  if (vista === 'mios') resumen = 'Los casos abiertos que tienes a cargo.'
+  if (vista === 'todos') resumen = 'Todos los casos, incluidos los cerrados.'
+  if (casos && (casos.length > 0 || conFiltros)) {
     const cantidad = `${casos.length} ${casos.length === 1 ? 'caso' : 'casos'}`
     const sinAgente = casos.filter((c) => !c.agente).length
-    resumen = vista === 'mios' ? `${cantidad} asignados a ti` : `${cantidad} · ${sinAgente} sin asignar`
+    if (conFiltros) resumen = `${cantidad} con estos filtros`
+    else if (vista === 'mios') resumen = `${cantidad} asignados a ti`
+    else resumen = `${cantidad} · ${sinAgente} sin asignar`
   }
 
   let contenido = null
@@ -69,7 +87,11 @@ export function Bandeja() {
   } else if (casos.length === 0) {
     contenido = (
       <Tarjeta>
-        {vista === 'mios' ? (
+        {conFiltros ? (
+          <EstadoVacio icono="filtros" titulo="No hay casos con esos filtros" accion={<Boton onClick={limpiar}>Limpiar filtros</Boton>}>
+            Prueba con otros filtros o límpialos para ver todos los casos de esta pestaña.
+          </EstadoVacio>
+        ) : vista === 'mios' ? (
           <EstadoVacio
             icono="usuario"
             titulo="No tienes casos asignados"
@@ -97,17 +119,22 @@ export function Bandeja() {
           <p className="mt-1 text-texto-suave">{resumen}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {esAgente && (
-            <Segmentado
-              aria-label="Vista de la bandeja"
-              valor={vista}
-              onChange={cambiarVista}
-              opciones={[
-                { valor: 'pendientes', texto: 'Pendientes' },
-                { valor: 'mios', texto: 'Asignados a mí' },
-              ]}
-            />
-          )}
+          <Segmentado
+            aria-label="Vista de la bandeja"
+            valor={vista}
+            onChange={cambiarVista}
+            opciones={
+              esAgente
+                ? [
+                    { valor: 'pendientes', texto: 'Pendientes' },
+                    { valor: 'mios', texto: 'Asignados a mí' },
+                  ]
+                : [
+                    { valor: 'pendientes', texto: 'Pendientes' },
+                    { valor: 'todos', texto: 'Todos' },
+                  ]
+            }
+          />
           <Boton cargando={actualizando} onClick={recargar}>
             Actualizar
           </Boton>
