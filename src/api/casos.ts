@@ -1,4 +1,4 @@
-import type { Caso, EstadoCaso, NuevoCaso } from '../types'
+import type { Caso, EstadoCaso, NuevoCaso, Prioridad, TipoCaso } from '../types'
 import { api } from './client'
 
 export type { NuevoCaso } from '../types'
@@ -17,6 +17,19 @@ export async function obtenerCaso(id: number): Promise<Caso | null> {
 /** PATCH /casos/:id/estado (transiciones manuales del agente) */
 export function cambiarEstado(id: number, estado: EstadoCaso): Promise<Caso> {
   return api<Caso>(`/casos/${id}/estado`, { method: 'PATCH', body: { estado } })
+}
+
+/** Cuerpo de PATCH /casos/:id/clasificacion. areaId y categoriaId van juntos (RN-03) */
+export interface CambiosClasificacion {
+  tipo?: TipoCaso
+  prioridad?: Prioridad
+  areaId?: number
+  categoriaId?: number
+}
+
+/** PATCH /casos/:id/clasificacion (solo AGENTE, en Pendiente o En análisis: RN-08) */
+export function reclasificarCaso(id: number, cambios: CambiosClasificacion): Promise<Caso> {
+  return api<Caso>(`/casos/${id}/clasificacion`, { method: 'PATCH', body: cambios })
 }
 
 /** Parámetros de GET /casos. Cada tarea agrega los que implemente el backend (ver docs/03-api.md) */
