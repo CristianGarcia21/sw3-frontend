@@ -218,8 +218,8 @@ interface PropsLista<T> extends PropsComunes<T> {
   placeholder?: string
   /** Marca el control en rojo. El mensaje va en el <Campo> que lo envuelve */
   invalida?: boolean
-  /** 'campo' para formularios; 'discreta' sin fondo, para la navegación */
-  variante?: 'campo' | 'discreta'
+  /** 'campo' para formularios; 'discreta' sin fondo, para la navegación; 'capsula' para filtros de una sola opción */
+  variante?: 'campo' | 'discreta' | 'capsula'
   /** Reemplaza el texto del botón, por ejemplo con avatar y nombre */
   contenido?: ReactNode
 }
@@ -231,7 +231,7 @@ interface PropsLista<T> extends PropsComunes<T> {
 export function ListaDesplegable<T extends string | number>({ valor, onChange, placeholder = 'Elige una opción', variante = 'campo', contenido, ...resto }: PropsLista<T>) {
   const elegida = resto.opciones.find((o) => o.valor === valor)
   return (
-    <ListaBase {...resto} variante={variante} multiple={false} elegidas={valor === null ? [] : [valor]} onElegir={onChange}>
+    <ListaBase {...resto} variante={variante} multiple={false} elegidas={valor === null ? [] : [valor]} onElegir={onChange} resaltado={variante === 'capsula' && valor !== null}>
       {contenido ?? <span className={`min-w-0 flex-1 truncate ${elegida ? '' : 'text-texto-suave'}`}>{elegida?.texto ?? placeholder}</span>}
     </ListaBase>
   )

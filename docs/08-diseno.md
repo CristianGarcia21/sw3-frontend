@@ -77,8 +77,8 @@ import { Boton, Campo, CampoArea, CampoTexto, Confirmacion, Esqueleto, EstadoVac
 |---|---|---|
 | Un botón | `Boton` | `variante`: `primario`, `secundario` (por defecto), `texto`, `destructivo`, `vidrio`, `vidrio-acento`. Props `icono`, `cargando`, `soloIcono` |
 | Un campo de texto | `CampoTexto`, `CampoArea` | Traen etiqueta, `ayuda`, `error` y `conContador` |
-| Elegir una opción de una lista | `ListaDesplegable` dentro de `Campo` | Reemplaza al `<select>`. Las opciones pueden tener `detalle`, `color` y `deshabilitada` |
-| Filtrar por varias opciones | `FiltroMultiple` | `variante="vidrio"` si va en una barra flotante |
+| Elegir una opción de una lista | `ListaDesplegable` dentro de `Campo` | Reemplaza al `<select>`. Las opciones pueden tener `detalle`, `color` y `deshabilitada`. Como filtro de una sola opción, `variante="capsula"` |
+| Filtrar por varias opciones | `FiltroMultiple` | `variante="vidrio"` si la cápsula flota sola; dentro de una barra de vidrio, la sólida (por defecto) |
 | Elegir entre 2 a 6 opciones a la vista | `Segmentado` | Tipo de caso, prioridad, pestañas de una vista |
 | Activar o desactivar algo | `Interruptor` | El cambio aplica al instante |
 | Una tarea que bloquea | `Modal` | Formularios cortos: asignar, devolver, registrar solución |
