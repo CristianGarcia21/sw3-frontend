@@ -113,19 +113,32 @@ El frontend se encarga de mostrarlos con texto legible ("En análisis", "Solicit
 
 ### GET /casos
 
-Query params opcionales y combinables:
-- `abiertos`: booleano (`true` excluye los casos en estado `CERRADA`).
-- `agenteId`: entero positivo (filtra los casos asignados a ese agente).
-- `sinAgente`: booleano (`true` filtra los casos sin agente asignado).
-- `solicitanteId`: entero positivo (filtra por solicitante).
-- `orden`: `fecha_desc` (por defecto) o `prioridad` (ordena por P1, P2, P3 y dentro del mismo nivel el más antiguo primero, CP-13).
-- Filtros adicionales para historias posteriores (#41): `estado`, `tipo`, `areaId`, `categoriaId`, `prioridad`, `q`.
+Query params opcionales. Todos se combinan con Y lógico; si ningún caso coincide, la respuesta es `200 []`.
+
+| Parámetro | Valores | Efecto |
+|---|---|---|
+| `estado` | Uno o varios separados por coma (`estado=PENDIENTE,EN_ANALISIS`) | Casos en alguno de esos estados |
+| `tipo` | `INCIDENTE`, `SOLICITUD` (uno o ambos) | Casos de ese tipo |
+| `prioridad` | `P1`, `P2`, `P3` (uno o varios: `prioridad=P1,P2`) | Casos con alguna de esas prioridades |
+| `areaId` | Entero positivo | Casos cuya categoría pertenece a esa área |
+| `categoriaId` | Entero positivo | Casos de esa categoría. Si no pertenece a `areaId`, la respuesta es `200 []` |
+| `q` | Texto, máximo 180 caracteres | Busca en el título sin distinguir mayúsculas. Es literal: `wifi` no encuentra "Wi-Fi" |
+| `solicitanteId` | Entero positivo | Casos de ese solicitante (ver RN-20 abajo) |
+| `agenteId` | Entero positivo | Casos asignados a ese agente |
+| `sinAgente` | `true` / `false` | `true`: solo casos sin agente (tiene prioridad sobre `agenteId`). `false` u omitido: sin filtro |
+| `abiertos` | `true` / `false` | `true`: excluye los casos `CERRADA`. `false` u omitido: sin filtro |
+| `orden` | `fecha_desc` (por defecto), `prioridad` | `fecha_desc`: más recientes primero. `prioridad`: P1 → P3 y, dentro de cada prioridad, el más antiguo primero (CP-13) |
+
+`estado`, `tipo` y `prioridad` también se aceptan repetidos (`prioridad=P1&prioridad=P2`). Un parámetro vacío (`?areaId=`) se ignora.
+
+Un valor que no pertenece a la lista, no es numérico o está fuera de rango responde `400 VALIDACION`, con el parámetro en `detalles[].campo`.
 
 Pestañas de la bandeja del agente (HU-03):
 - **Pendientes:** `GET /api/casos?abiertos=true&orden=prioridad`
 - **Asignados a mí:** `GET /api/casos?abiertos=true&agenteId=<miId>&orden=prioridad`
 
-Si el usuario actual es solicitante, el backend ignora `solicitanteId` y siempre filtra por él (RN-20).
+Si el usuario actual es solicitante, el backend ignora `solicitanteId` y siempre filtra por él (RN-20); los demás filtros se aplican sobre sus casos.
+
 
 ### PATCH /casos/{id}/asignar
 
