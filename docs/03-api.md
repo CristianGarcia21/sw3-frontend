@@ -168,7 +168,19 @@ No acepta `CERRADA`. Devuelve `409` si la transición no está permitida.
 { "aprobado": false, "comentario": "El usuario sigue sin conexión en el aula 204." }
 ```
 
-`aprobado: true` cierra el caso. `aprobado: false` exige `comentario` y lo devuelve a `EN_ATENCION`.
+Solo para `VALIDADOR`. Responde `200` con el caso actualizado.
+
+- `aprobado: true`: el caso pasa a `CERRADA`, se guarda `fechaCierre` y se crea el evento `APROBACION`. El `comentario` es opcional.
+- `aprobado: false`: exige `comentario` de al menos 10 caracteres. El caso vuelve a `EN_ATENCION` con el mismo agente y se crea el evento `DEVOLUCION` con el comentario. Para volver a `EN_VALIDACION` el agente debe registrar una atención nueva; si no, `409 SIN_SOLUCION`.
+
+| Situación | Respuesta |
+|---|---|
+| Falta `aprobado`, o devolución sin comentario válido | `400 VALIDACION` |
+| El caso no existe | `404 NO_ENCONTRADO` |
+| No es `VALIDADOR` | `403 ROL_NO_PERMITIDO` |
+| Caso `CERRADA` | `409 CASO_CERRADO` |
+| Caso en un estado distinto de `EN_VALIDACION` | `409 ESTADO_NO_PERMITE_OPERACION` |
+| El validador registró la atención vigente | `409 VALIDADOR_ES_AGENTE` |
 
 ### GET /casos/{id}/historial
 
