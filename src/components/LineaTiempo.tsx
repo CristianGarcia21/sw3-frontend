@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react'
 import { ApiError } from '../api/client'
 import { obtenerHistorial } from '../api/casos'
 import { useUsuarioActual } from '../hooks/useUsuarioActual'
-import type { EventoHistorial, EventoHistorialItem, Usuario } from '../types'
+import type { EventoHistorial, EventoHistorialItem } from '../types'
 import { COLOR_ESTADO } from '../utils/colores'
 import { ETIQUETA_ESTADO, ETIQUETA_ROL, formatearFecha } from '../utils/etiquetas'
 import { Mensaje } from './Mensaje'
@@ -33,11 +33,11 @@ const APARIENCIA: Record<EventoHistorial, { icono: NombreIcono; tono: string }> 
 }
 
 /**
- * Texto legible del evento. En la asignación el agente viene en el comentario:
- * "Asignado a X" y "Reasignado de X a Y" (backend) o "Asignado al agente 3" (datos semilla).
+ * Texto legible del evento. En la asignación el backend manda el agente en el comentario:
+ * "Asignado a X" o "Reasignado de X a Y".
  * Devuelve también si el comentario ya quedó dicho en el texto, para no repetirlo.
  */
-function describir(evento: EventoHistorialItem, usuarios: Usuario[]): { texto: string; comentarioUsado: boolean } {
+function describir(evento: EventoHistorialItem): { texto: string; comentarioUsado: boolean } {
   const comentario = evento.comentario?.trim() ?? ''
   switch (evento.evento) {
     case 'CREACION':
@@ -45,8 +45,7 @@ function describir(evento: EventoHistorialItem, usuarios: Usuario[]): { texto: s
     case 'ASIGNACION': {
       const reasignado = comentario.match(/^Reasignado de (.+) a (.+)$/)
       if (reasignado) return { texto: `Reasignó de ${reasignado[1]} a ${reasignado[2]}`, comentarioUsado: true }
-      const porId = comentario.match(/^Asignado al agente (\d+)$/)
-      const nombre = porId ? usuarios.find((u) => u.id === Number(porId[1]))?.nombre : comentario.match(/^Asignado a (.+)$/)?.[1]
+      const nombre = comentario.match(/^Asignado a (.+)$/)?.[1]
       return nombre ? { texto: `Asignó a ${nombre}`, comentarioUsado: true } : { texto: 'Asignó el caso', comentarioUsado: false }
     }
     case 'CAMBIO_ESTADO':
@@ -70,7 +69,7 @@ function describir(evento: EventoHistorialItem, usuarios: Usuario[]): { texto: s
  * Es independiente del detalle: lo usan el detalle del agente y el del solicitante (HU-12).
  */
 export function LineaTiempo({ casoId, version = 0, compacta = false }: Props) {
-  const { usuario, usuarios } = useUsuarioActual()
+  const { usuario } = useUsuarioActual()
   const clave = `${usuario?.id ?? ''}|${casoId}`
   const [resultado, setResultado] = useState<Cargado<EventoHistorialItem[]> | null>(null)
   const [error, setError] = useState<Cargado<ApiError> | null>(null)
@@ -119,7 +118,7 @@ export function LineaTiempo({ casoId, version = 0, compacta = false }: Props) {
     contenido = (
       <ol className={`flex flex-col ${compacta ? 'gap-3' : 'gap-4.5'}`}>
         {eventos.map((evento, i) => (
-          <ItemEvento key={evento.id} evento={evento} usuarios={usuarios} compacta={compacta} ultimo={i === eventos.length - 1} />
+          <ItemEvento key={evento.id} evento={evento} compacta={compacta} ultimo={i === eventos.length - 1} />
         ))}
       </ol>
     )
@@ -142,16 +141,15 @@ export function LineaTiempo({ casoId, version = 0, compacta = false }: Props) {
 
 interface PropsItem {
   evento: EventoHistorialItem
-  usuarios: Usuario[]
   compacta: boolean
   ultimo: boolean
 }
 
-function ItemEvento({ evento, usuarios, compacta, ultimo }: PropsItem) {
+function ItemEvento({ evento, compacta, ultimo }: PropsItem) {
   const { icono, tono: tonoBase } = APARIENCIA[evento.evento]
   // El cambio de estado toma el color del estado al que llegó
   const tono = evento.evento === 'CAMBIO_ESTADO' && evento.estadoNuevo ? COLOR_ESTADO[evento.estadoNuevo] : tonoBase
-  const { texto, comentarioUsado } = describir(evento, usuarios)
+  const { texto, comentarioUsado } = describir(evento)
   const devolucion = evento.evento === 'DEVOLUCION'
   // En la versión compacta no se muestran los comentarios de reclasificación
   const comentario = evento.comentario && !comentarioUsado && !(compacta && evento.evento === 'RECLASIFICACION') ? evento.comentario : null
