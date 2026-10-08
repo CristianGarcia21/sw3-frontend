@@ -6,9 +6,11 @@ import { EstadoBadge } from '../components/EstadoBadge'
 import { Mensaje } from '../components/Mensaje'
 import { PrioridadBadge } from '../components/PrioridadBadge'
 import { Boton, Esqueleto, EstadoVacio, Segmentado, Tarjeta } from '../components/ui'
+import { useAsignarCaso } from '../hooks/useAsignarCaso'
 import { useCasos } from '../hooks/useCasos'
 import { useUsuarioActual } from '../hooks/useUsuarioActual'
 import type { Caso } from '../types'
+import { puedeAsignarse } from '../utils/estados'
 import { ETIQUETA_TIPO, formatearAntiguedad, formatearFecha } from '../utils/etiquetas'
 import { aConsulta, hayFiltros, leerFiltros, limpiarFiltros } from '../utils/filtrosBandeja'
 import { RUTAS } from '../utils/navegacion'
@@ -39,6 +41,15 @@ export function Bandeja() {
   if (vista !== 'todos') pestana.abiertos = true
   if (vista === 'mios') pestana.agenteId = usuario?.id
   const { casos, error, actualizando, recargar } = useCasos({ ...pestana, ...aConsulta(filtrosUrl) })
+  const { asignar, asignando } = useAsignarCaso()
+
+  // HU-04: el agente toma un caso desde Pendientes. Con éxito o con error se refresca la lista,
+  // así se ve el agente nuevo o el estado real si otro agente lo tomó antes
+  async function asignarme(caso: Caso) {
+    if (!usuario) return
+    await asignar(caso, usuario)
+    recargar()
+  }
 
   // La antigüedad se recalcula cada minuto sin volver a pedir los casos
   const [ahora, setAhora] = useState(() => Date.now())
@@ -107,7 +118,7 @@ export function Bandeja() {
       </Tarjeta>
     )
   } else {
-    contenido = <TablaBandeja casos={casos} ahora={ahora} />
+    contenido = <TablaBandeja casos={casos} ahora={ahora} onAsignarme={esAgente && vista === 'pendientes' ? asignarme : undefined} asignando={asignando} />
   }
 
   return (
@@ -154,7 +165,16 @@ export function Bandeja() {
   )
 }
 
-function TablaBandeja({ casos, ahora }: { casos: Caso[]; ahora: number }) {
+interface PropsTabla {
+  casos: Caso[]
+  ahora: number
+  /** Solo llega para el agente en Pendientes: muestra Asignarme en las filas sin agente */
+  onAsignarme?: (caso: Caso) => void
+  /** id del caso que se está asignando */
+  asignando: number | null
+}
+
+function TablaBandeja({ casos, ahora, onAsignarme, asignando }: PropsTabla) {
   return (
     <Tarjeta className="overflow-x-auto">
       <table className="w-full min-w-240 text-left">
@@ -192,7 +212,24 @@ function TablaBandeja({ casos, ahora }: { casos: Caso[]; ahora: number }) {
                 <EstadoBadge estado={caso.estado} />
               </td>
               <td className="px-4 py-3 whitespace-nowrap">{caso.solicitante.nombre}</td>
-              <td className="px-4 py-3 whitespace-nowrap">{caso.agente ? caso.agente.nombre : <span className="text-texto-suave">Sin asignar</span>}</td>
+              <td className="px-4 py-3 whitespace-nowrap">
+                {caso.agente ? (
+                  caso.agente.nombre
+                ) : onAsignarme && puedeAsignarse(caso.estado) ? (
+                  // Queda por encima del enlace de la fila: el clic asigna y no abre el detalle
+                  <Boton
+                    className="relative z-10"
+                    aria-label={`Asignarme el caso #${caso.id}`}
+                    cargando={asignando === caso.id}
+                    disabled={asignando !== null}
+                    onClick={() => onAsignarme(caso)}
+                  >
+                    Asignarme
+                  </Boton>
+                ) : (
+                  <span className="text-texto-suave">Sin asignar</span>
+                )}
+              </td>
               <td className="cifras px-4 py-3 whitespace-nowrap text-texto-suave">
                 <time dateTime={caso.fechaCreacion} title={formatearFecha(caso.fechaCreacion)}>
                   {formatearAntiguedad(caso.fechaCreacion, ahora)}
