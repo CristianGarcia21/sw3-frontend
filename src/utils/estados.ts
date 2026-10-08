@@ -28,3 +28,10 @@ const TRANSICIONES_MANUALES: Partial<Record<EstadoCaso, TransicionManualEstado>>
 export function obtenerTransicionManual(estado: EstadoCaso): TransicionManualEstado | null {
   return TRANSICIONES_MANUALES[estado] ?? null
 }
+
+/** RN-19: un caso solo se asigna o reasigna mientras está en Pendiente o En análisis */
+export const ESTADOS_ASIGNABLES: EstadoCaso[] = ['PENDIENTE', 'EN_ANALISIS']
+
+export function puedeAsignarse(estado: EstadoCaso): boolean {
+  return ESTADOS_ASIGNABLES.includes(estado)
+}

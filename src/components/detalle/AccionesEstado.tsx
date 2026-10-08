@@ -38,6 +38,8 @@ export function AccionesEstado({ caso, onCasoActualizado }: Props) {
   const [confirmacionAbierta, setConfirmacionAbierta] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const transicion = obtenerTransicionManual(caso.estado)
+  // RN-11: para pasar a En atención el caso debe tener agente. El backend igual lo valida
+  const faltaAgente = caso.estado === 'EN_ANALISIS' && !caso.agente
 
   if (usuario?.rol !== 'AGENTE' || !transicion) return null
 
@@ -65,9 +67,11 @@ export function AccionesEstado({ caso, onCasoActualizado }: Props) {
       <Tarjeta className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div>
           <h2 className="text-sm font-semibold">Siguiente paso</h2>
-          <p className="mt-1 text-[13px] text-texto-suave">Actualiza el estado del caso cuando corresponda.</p>
+          <p id="siguiente-paso-nota" className="mt-1 text-[13px] text-texto-suave">
+            {faltaAgente ? 'Primero asigna un agente.' : 'Actualiza el estado del caso cuando corresponda.'}
+          </p>
         </div>
-        <Boton variante="primario" onClick={() => setConfirmacionAbierta(true)}>
+        <Boton variante="primario" disabled={faltaAgente} aria-describedby="siguiente-paso-nota" onClick={() => setConfirmacionAbierta(true)}>
           {transicion.accion}
         </Boton>
       </Tarjeta>
