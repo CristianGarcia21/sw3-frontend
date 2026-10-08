@@ -74,6 +74,29 @@ El frontend se encarga de mostrarlos con texto legible ("En análisis", "Solicit
 | GET | `/casos/{id}/historial` | Historial del caso | HU-08 |
 | GET | `/indicadores` | Indicadores del servicio | HU-10 |
 
+### Categorías (HU-11)
+
+Las cuatro rutas de escritura son solo para `ADMINISTRADOR`. `GET /categorias` sigue siendo público.
+
+`GET /categorias` devuelve `{ id, areaId, nombre, descripcion, activa, totalCasos }`. `totalCasos` es el número de casos que usan la categoría (activos o cerrados); el front lo usa para saber si se puede borrar.
+
+| Ruta | Body | Respuesta |
+|---|---|---|
+| `POST /categorias` | `{ "areaId": 2, "nombre": "Licencias", "descripcion": "…" }` (`descripcion` opcional) | `201` categoría creada, activa, con `totalCasos: 0` |
+| `PUT /categorias/{id}` | `{ "nombre": "…", "descripcion": "…" }` | `200` categoría actualizada. No cambia el área (si hace falta, se crea otra). Si se omite `descripcion`, queda en `null` |
+| `PATCH /categorias/{id}/activa` | `{ "activa": false }` | `200` categoría actualizada. Los casos que ya la usaban siguen mostrándola |
+| `DELETE /categorias/{id}` | – | `204` |
+
+Validaciones: `nombre` con `trim()` y entre 2 y 100 caracteres, `descripcion` de hasta 255, `areaId` entero positivo que exista.
+
+| Situación | Respuesta |
+|---|---|
+| Nombre vacío o muy largo, `areaId` o `activa` inválidos | `400 VALIDACION` |
+| `areaId` o categoría inexistente | `404 NO_ENCONTRADO` |
+| No es `ADMINISTRADOR` | `403 ROL_NO_PERMITIDO` |
+| Nombre repetido en el área, sin distinguir mayúsculas (`wi-fi` choca con `Wi-Fi`; en otra área sí se permite) | `409 CATEGORIA_DUPLICADA` |
+| `DELETE` con casos asociados | `409 CATEGORIA_CON_CASOS` ("Tiene N casos; desactívala en vez de borrarla") |
+
 ### POST /casos
 
 ```json

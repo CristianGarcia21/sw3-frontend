@@ -48,7 +48,7 @@ export interface Categoria {
   nombre: string
   descripcion: string | null
   activa: boolean
-  /** Solo lo envía GET /categorias a partir de HU-11 */
+  /** Casos que usan la categoría (HU-11); lo envía la API en GET y en las escrituras de /categorias */
   totalCasos?: number
 }
 
