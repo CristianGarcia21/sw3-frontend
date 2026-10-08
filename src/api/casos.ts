@@ -1,4 +1,4 @@
-import type { Caso, EstadoCaso, NuevoCaso, Prioridad, TipoCaso } from '../types'
+import type { Caso, EstadoCaso, EventoHistorialItem, NuevoCaso, Prioridad, TipoCaso } from '../types'
 import { api } from './client'
 
 export type { NuevoCaso } from '../types'
@@ -12,6 +12,11 @@ export function registrarCaso(datos: NuevoCaso) {
 export async function obtenerCaso(id: number): Promise<Caso | null> {
   const casos = await api<Caso[]>('/casos')
   return casos.find((caso) => caso.id === id) ?? null
+}
+
+/** GET /casos/:id/historial: eventos del caso. Agente, validador y administrador ven cualquiera; el solicitante, los suyos */
+export function obtenerHistorial(id: number): Promise<EventoHistorialItem[]> {
+  return api<EventoHistorialItem[]>(`/casos/${id}/historial`)
 }
 
 /** PATCH /casos/:id/estado (transiciones manuales del agente) */

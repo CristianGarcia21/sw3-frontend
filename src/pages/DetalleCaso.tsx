@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { ApiError } from '../api/client'
 import { obtenerCaso } from '../api/casos'
+import { LineaTiempo } from '../components/LineaTiempo'
 import { Mensaje } from '../components/Mensaje'
 import { AccionesEstado } from '../components/detalle/AccionesEstado'
 import { CabeceraCaso } from '../components/detalle/CabeceraCaso'
 import { DatosCaso } from '../components/detalle/DatosCaso'
-import { LineaTiempo } from '../components/detalle/LineaTiempo'
 import { PanelAsignacion } from '../components/detalle/PanelAsignacion'
 import { PanelAtencion } from '../components/detalle/PanelAtencion'
 import { PanelReclasificacion } from '../components/detalle/PanelReclasificacion'
@@ -37,6 +37,8 @@ export function DetalleCaso() {
   const [resultado, setResultado] = useState<Cargado<Caso | null> | null>(null)
   const [error, setError] = useState<Cargado<ApiError> | null>(null)
   const [intento, setIntento] = useState(0)
+  // Sube con cada acción sobre el caso para que la línea de tiempo traiga el evento nuevo
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
     if (casoId === null) return
@@ -74,6 +76,7 @@ export function DetalleCaso() {
   function actualizarCaso(caso: Caso) {
     if (casoId === null) return
     setResultado({ usuarioId, casoId, intento, valor: caso })
+    setVersion((v) => v + 1)
   }
 
   if (casoId === null || resultadoActual === null) {
@@ -124,7 +127,7 @@ export function DetalleCaso() {
       <PanelReclasificacion caso={resultadoActual} onCasoActualizado={actualizarCaso} />
       <PanelAtencion />
       <PanelValidacion />
-      <LineaTiempo />
+      <LineaTiempo casoId={resultadoActual.id} version={version} />
     </section>
   )
 }
