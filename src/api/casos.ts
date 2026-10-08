@@ -19,6 +19,11 @@ export function cambiarEstado(id: number, estado: EstadoCaso): Promise<Caso> {
   return api<Caso>(`/casos/${id}/estado`, { method: 'PATCH', body: { estado } })
 }
 
+/** PATCH /casos/:id/asignar (solo AGENTE). Para asignarse a sí mismo se manda el propio id */
+export function asignarCaso(id: number, agenteId: number): Promise<Caso> {
+  return api<Caso>(`/casos/${id}/asignar`, { method: 'PATCH', body: { agenteId } })
+}
+
 /** Cuerpo de PATCH /casos/:id/clasificacion. areaId y categoriaId van juntos (RN-03) */
 export interface CambiosClasificacion {
   tipo?: TipoCaso
