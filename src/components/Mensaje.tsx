@@ -2,12 +2,13 @@ import type { CSSProperties, ReactNode } from 'react'
 import { Boton } from './ui/Boton'
 import { Icono, type NombreIcono } from './ui/Icono'
 
-type TipoMensaje = 'exito' | 'error' | 'info'
+type TipoMensaje = 'exito' | 'error' | 'info' | 'advertencia'
 
 const APARIENCIA: Record<TipoMensaje, { icono: NombreIcono; tono: string }> = {
   exito: { icono: 'validar', tono: 'var(--estado-cerrada)' },
   error: { icono: 'alerta', tono: 'var(--urgente)' },
   info: { icono: 'info', tono: 'var(--acento)' },
+  advertencia: { icono: 'alerta', tono: 'var(--estado-en-analisis)' },
 }
 
 interface Props {
