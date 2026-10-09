@@ -12,6 +12,7 @@ import { PanelAtencion } from '../components/detalle/PanelAtencion'
 import { PanelReclasificacion } from '../components/detalle/PanelReclasificacion'
 import { PanelValidacion } from '../components/detalle/PanelValidacion'
 import { Esqueleto, EstadoVacio, Tarjeta } from '../components/ui'
+import { tieneSolucionVigente, useHistorial } from '../hooks/useHistorial'
 import { useUsuarioActual } from '../hooks/useUsuarioActual'
 import type { Caso } from '../types'
 import { MENU_POR_ROL, rutaInicial } from '../utils/navegacion'
@@ -39,6 +40,7 @@ export function DetalleCaso() {
   const [intento, setIntento] = useState(0)
   // Sube con cada acción sobre el caso para que la línea de tiempo traiga el evento nuevo
   const [version, setVersion] = useState(0)
+  const eventos = useHistorial(casoId ?? 0, version)
 
   useEffect(() => {
     if (casoId === null) return
@@ -122,10 +124,10 @@ export function DetalleCaso() {
     <section className="flex flex-col gap-5">
       <CabeceraCaso caso={resultadoActual} />
       <DatosCaso caso={resultadoActual} />
-      <AccionesEstado caso={resultadoActual} onCasoActualizado={actualizarCaso} />
+      <AccionesEstado caso={resultadoActual} onCasoActualizado={actualizarCaso} sinSolucion={!eventos || !tieneSolucionVigente(eventos)} />
       <PanelAsignacion caso={resultadoActual} onCasoActualizado={actualizarCaso} onRecargar={reintentar} />
       <PanelReclasificacion caso={resultadoActual} onCasoActualizado={actualizarCaso} />
-      <PanelAtencion />
+      <PanelAtencion key={resultadoActual.id} caso={resultadoActual} eventos={eventos} onAtencionRegistrada={() => setVersion((v) => v + 1)} />
       <PanelValidacion />
       <LineaTiempo casoId={resultadoActual.id} version={version} />
     </section>

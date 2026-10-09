@@ -11,6 +11,8 @@ import { Boton, Confirmacion, Tarjeta } from '../ui'
 interface Props {
   caso: Caso
   onCasoActualizado: (caso: Caso) => void
+  /** RN-13: el caso En atención todavía no tiene una solución vigente registrada (HU-06) */
+  sinSolucion?: boolean
 }
 
 function tituloError(error: TipoApiError): string {
@@ -32,7 +34,7 @@ function tituloError(error: TipoApiError): string {
   }
 }
 
-export function AccionesEstado({ caso, onCasoActualizado }: Props) {
+export function AccionesEstado({ caso, onCasoActualizado, sinSolucion = false }: Props) {
   const { usuario } = useUsuarioActual()
   const avisos = useAvisos()
   const [confirmacionAbierta, setConfirmacionAbierta] = useState(false)
@@ -40,6 +42,11 @@ export function AccionesEstado({ caso, onCasoActualizado }: Props) {
   const transicion = obtenerTransicionManual(caso.estado)
   // RN-11: para pasar a En atención el caso debe tener agente. El backend igual lo valida
   const faltaAgente = caso.estado === 'EN_ANALISIS' && !caso.agente
+  // RN-13: para enviar a validación debe haber una solución registrada. El backend igual lo valida
+  const faltaSolucion = caso.estado === 'EN_ATENCION' && sinSolucion
+  let nota = 'Actualiza el estado del caso cuando corresponda.'
+  if (faltaAgente) nota = 'Primero asigna un agente.'
+  if (faltaSolucion) nota = 'Registra la solución antes de enviar a validación.'
 
   if (usuario?.rol !== 'AGENTE' || !transicion) return null
 
@@ -68,10 +75,10 @@ export function AccionesEstado({ caso, onCasoActualizado }: Props) {
         <div>
           <h2 className="text-sm font-semibold">Siguiente paso</h2>
           <p id="siguiente-paso-nota" className="mt-1 text-[13px] text-texto-suave">
-            {faltaAgente ? 'Primero asigna un agente.' : 'Actualiza el estado del caso cuando corresponda.'}
+            {nota}
           </p>
         </div>
-        <Boton variante="primario" disabled={faltaAgente} aria-describedby="siguiente-paso-nota" onClick={() => setConfirmacionAbierta(true)}>
+        <Boton variante="primario" disabled={faltaAgente || faltaSolucion} aria-describedby="siguiente-paso-nota" onClick={() => setConfirmacionAbierta(true)}>
           {transicion.accion}
         </Boton>
       </Tarjeta>
