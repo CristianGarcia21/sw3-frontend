@@ -24,6 +24,17 @@ export function registrarAtencion(id: number, datos: { diagnostico: string; solu
   return api<Atencion>(`/casos/${id}/atencion`, { method: 'POST', body: datos })
 }
 
+/** Cuerpo de POST /casos/:id/validacion. Para devolver, el comentario es obligatorio y de mínimo 10 caracteres (RN-15) */
+export interface Validacion {
+  aprobado: boolean
+  comentario?: string
+}
+
+/** POST /casos/:id/validacion (HU-07, solo VALIDADOR): aprobar cierra el caso (RN-14); devolver lo regresa a En atención (RN-15) */
+export function validarCaso(id: number, datos: Validacion): Promise<Caso> {
+  return api<Caso>(`/casos/${id}/validacion`, { method: 'POST', body: datos })
+}
+
 /** PATCH /casos/:id/estado (transiciones manuales del agente) */
 export function cambiarEstado(id: number, estado: EstadoCaso): Promise<Caso> {
   return api<Caso>(`/casos/${id}/estado`, { method: 'PATCH', body: { estado } })

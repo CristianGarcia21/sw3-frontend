@@ -38,6 +38,20 @@ export function devolucionPendiente(eventos: EventoHistorialItem[]): EventoHisto
   return ultimo?.evento === 'DEVOLUCION' ? ultimo : null
 }
 
+/** El evento de la solución vigente: la última atención, si no hubo una devolución después */
+export function atencionVigente(eventos: EventoHistorialItem[]): EventoHistorialItem | null {
+  const ultimo = [...eventos].reverse().find((e) => e.evento === 'DEVOLUCION' || e.evento === 'ATENCION')
+  return ultimo?.evento === 'ATENCION' ? ultimo : null
+}
+
+/** Cuándo entró el caso a En validación por última vez. El objeto Caso no trae esa fecha; sale del historial */
+export function fechaLlegadaAValidacion(eventos: EventoHistorialItem[]): string | null {
+  const entradas = eventos
+    .filter((e) => e.estadoNuevo === 'EN_VALIDACION')
+    .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime() || a.id - b.id)
+  return entradas.at(-1)?.fecha ?? null
+}
+
 /** RN-13: hay una atención registrada después de la última devolución */
 export function tieneSolucionVigente(eventos: EventoHistorialItem[]): boolean {
   const ultimo = [...eventos].reverse().find((e) => e.evento === 'DEVOLUCION' || e.evento === 'ATENCION')
