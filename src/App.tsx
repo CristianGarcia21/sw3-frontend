@@ -8,6 +8,7 @@ import { EnConstruccion } from './pages/EnConstruccion'
 import { Inicio } from './pages/Inicio'
 import { MisCasos } from './pages/MisCasos'
 import { NoEncontrada } from './pages/NoEncontrada'
+import { PorValidar } from './pages/PorValidar'
 import { RegistrarCaso } from './pages/RegistrarCaso'
 import { RUTAS } from './utils/navegacion'
 
@@ -62,7 +63,7 @@ export default function App() {
           path={RUTAS.porValidar}
           element={
             <RutaConRol roles={['VALIDADOR']}>
-              <EnConstruccion titulo="Casos por validar" issue="HU-07 · #34" />
+              <PorValidar />
             </RutaConRol>
           }
         />

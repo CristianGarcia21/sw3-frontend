@@ -128,7 +128,7 @@ export function DetalleCaso() {
       <PanelAsignacion caso={resultadoActual} onCasoActualizado={actualizarCaso} onRecargar={reintentar} />
       <PanelReclasificacion caso={resultadoActual} onCasoActualizado={actualizarCaso} />
       <PanelAtencion key={resultadoActual.id} caso={resultadoActual} eventos={eventos} onAtencionRegistrada={() => setVersion((v) => v + 1)} />
-      <PanelValidacion />
+      <PanelValidacion caso={resultadoActual} eventos={eventos} onRecargar={reintentar} />
       <LineaTiempo casoId={resultadoActual.id} version={version} />
     </section>
   )
