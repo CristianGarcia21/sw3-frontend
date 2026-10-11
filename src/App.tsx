@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router'
 import { Layout } from './components/layout/Layout'
 import { RutaConRol } from './components/RutaConRol'
 import { Bandeja } from './pages/Bandeja'
+import { Categorias } from './pages/Categorias'
 import { Componentes } from './pages/Componentes'
 import { DetalleCaso } from './pages/DetalleCaso'
 import { EnConstruccion } from './pages/EnConstruccion'
@@ -79,7 +80,7 @@ export default function App() {
           path={RUTAS.categorias}
           element={
             <RutaConRol roles={['ADMINISTRADOR']}>
-              <EnConstruccion titulo="Categorías" issue="HU-11 · #51" />
+              <Categorias />
             </RutaConRol>
           }
         />
