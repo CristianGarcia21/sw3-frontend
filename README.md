@@ -132,6 +132,7 @@ docs/          documentación del taller (requisitos, backlog, pruebas, métrica
 | [06-pruebas](docs/06-pruebas.md) | Casos de prueba, resultados y registro de defectos |
 | [07-metricas](docs/07-metricas.md) | Cómo registramos WIP, Throughput, Lead/Cycle Time, defectos y bloqueos |
 | [08-diseno](docs/08-diseno.md) | Guía de diseño: colores, vidrio, componentes y reglas para que todas las pantallas se vean igual |
+| [09-indicadores](docs/09-indicadores.md) | Cómo se calcula cada indicador del servicio y la diapositiva de la presentación |
 | [sprints/](docs/sprints/) | Planning, Review y Retrospectiva de cada sprint |
 | [recursos/](docs/recursos/) | Material entregado por el docente |
 
