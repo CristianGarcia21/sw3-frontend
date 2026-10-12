@@ -239,7 +239,7 @@ Eventos: `CREACION`, `RECLASIFICACION`, `ASIGNACION`, `CAMBIO_ESTADO`, `ATENCION
 
 ### GET /indicadores
 
-Acepta los mismos filtros de fecha `desde` y `hasta` (opcionales).
+Solo para `ADMINISTRADOR`. Acepta los filtros opcionales `desde` y `hasta` (`YYYY-MM-DD`), que filtran por `fechaCreacion` e incluyen ambos días.
 
 ```json
 {
@@ -247,9 +247,21 @@ Acepta los mismos filtros de fecha `desde` y `hasta` (opcionales).
   "porEstado": { "PENDIENTE": 5, "EN_ANALISIS": 3, "EN_ATENCION": 6, "EN_VALIDACION": 2, "CERRADA": 26 },
   "porTipo": { "INCIDENTE": 30, "SOLICITUD": 12 },
   "porPrioridad": { "P1": 8, "P2": 25, "P3": 9 },
-  "porArea": [{ "area": "Red y conectividad", "cantidad": 15 }],
+  "porArea": [
+    { "areaId": 1, "area": "Hardware", "cantidad": 9 },
+    { "areaId": 3, "area": "Red y conectividad", "cantidad": 15 }
+  ],
   "promedioHorasHastaAsignacion": 3.4,
   "promedioHorasResolucion": 27.8,
   "devoluciones": 4
 }
 ```
+
+- `porEstado`, `porTipo` y `porPrioridad` traen siempre todas las llaves del enum, en 0 si no hay casos.
+- `porArea` trae las 5 áreas, ordenadas por `areaId`, aunque tengan 0 casos. El ejemplo muestra solo dos.
+- `promedioHorasHastaAsignacion`: promedio de `fechaAsignacion − fechaCreacion` de los casos con agente, en horas con 1 decimal. `null` si no hay ninguno.
+- `promedioHorasResolucion`: promedio de `fechaCierre − fechaCreacion` de los casos `CERRADA`, en horas con 1 decimal. `null` si no hay ninguno.
+- `devoluciones`: número de eventos `DEVOLUCION` del rango. Se filtra por la fecha del evento, no por la creación del caso.
+- Los días se toman en UTC: `desde` empieza a las `00:00:00Z` y `hasta` termina a las `23:59:59.999Z`.
+
+Errores: `400 VALIDACION` (fecha con otro formato o inexistente, parámetro repetido, o `desde` posterior a `hasta`) y `403 ROL_NO_PERMITIDO` (no es administrador).
