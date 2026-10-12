@@ -14,8 +14,8 @@ import { PanelValidacion } from '../components/detalle/PanelValidacion'
 import { Esqueleto, EstadoVacio, Tarjeta } from '../components/ui'
 import { tieneSolucionVigente, useHistorial } from '../hooks/useHistorial'
 import { useUsuarioActual } from '../hooks/useUsuarioActual'
-import type { Caso } from '../types'
-import { MENU_POR_ROL, rutaInicial } from '../utils/navegacion'
+import type { Atencion, Caso, CasoDetalle } from '../types'
+import { idDeRuta, MENU_POR_ROL, rutaInicial } from '../utils/navegacion'
 
 interface Cargado<T> {
   usuarioId: number | undefined
@@ -24,18 +24,12 @@ interface Cargado<T> {
   valor: T
 }
 
-function idValido(valor: string | undefined): number | null {
-  if (!valor) return null
-  const id = Number(valor)
-  return Number.isSafeInteger(id) && id > 0 ? id : null
-}
-
 export function DetalleCaso() {
   const { id } = useParams()
-  const casoId = idValido(id)
+  const casoId = idDeRuta(id)
   const { usuario } = useUsuarioActual()
   const usuarioId = usuario?.id
-  const [resultado, setResultado] = useState<Cargado<Caso | null> | null>(null)
+  const [resultado, setResultado] = useState<Cargado<CasoDetalle> | null>(null)
   const [error, setError] = useState<Cargado<ApiError> | null>(null)
   const [intento, setIntento] = useState(0)
   // Sube con cada acción sobre el caso para que la línea de tiempo traiga el evento nuevo
@@ -75,13 +69,25 @@ export function DetalleCaso() {
   const rutaDeVuelta = usuario ? rutaInicial(usuario.rol) : '/'
   const textoDeVuelta = usuario ? MENU_POR_ROL[usuario.rol][0].texto.toLowerCase() : 'inicio'
 
+  // Las acciones responden con el Caso sin atenciones: se conservan las que ya estaban
   function actualizarCaso(caso: Caso) {
-    if (casoId === null) return
-    setResultado({ usuarioId, casoId, intento, valor: caso })
+    if (casoId === null || !resultadoActual) return
+    setResultado({ usuarioId, casoId, intento, valor: { ...resultadoActual, ...caso } })
     setVersion((v) => v + 1)
   }
 
-  if (casoId === null || resultadoActual === null) {
+  // La atención nueva pasa a ser la solución vigente (la lista va de la más reciente a la más antigua)
+  function agregarAtencion(atencion: Atencion) {
+    if (casoId === null || !resultadoActual) return
+    const atenciones = [atencion, ...resultadoActual.atenciones]
+    setResultado({ usuarioId, casoId, intento, valor: { ...resultadoActual, atenciones, solucionVigente: atencion } })
+    setVersion((v) => v + 1)
+  }
+
+  // Un id que no es número (400 VALIDACION) se trata igual que uno que no existe
+  const noEncontrado = errorActual?.error === 'NO_ENCONTRADO' || errorActual?.error === 'VALIDACION'
+
+  if (casoId === null || noEncontrado) {
     return (
       <Tarjeta>
         <EstadoVacio
@@ -127,7 +133,7 @@ export function DetalleCaso() {
       <AccionesEstado caso={resultadoActual} onCasoActualizado={actualizarCaso} sinSolucion={!eventos || !tieneSolucionVigente(eventos)} />
       <PanelAsignacion caso={resultadoActual} onCasoActualizado={actualizarCaso} onRecargar={reintentar} />
       <PanelReclasificacion caso={resultadoActual} onCasoActualizado={actualizarCaso} />
-      <PanelAtencion key={resultadoActual.id} caso={resultadoActual} eventos={eventos} onAtencionRegistrada={() => setVersion((v) => v + 1)} />
+      <PanelAtencion key={resultadoActual.id} caso={resultadoActual} eventos={eventos} onAtencionRegistrada={agregarAtencion} />
       <PanelValidacion caso={resultadoActual} eventos={eventos} onRecargar={reintentar} />
       <LineaTiempo casoId={resultadoActual.id} version={version} />
     </section>

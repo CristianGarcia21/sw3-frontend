@@ -1,4 +1,4 @@
-import type { Atencion, Caso, EstadoCaso, EventoHistorialItem, NuevoCaso, Prioridad, TipoCaso } from '../types'
+import type { Atencion, Caso, CasoDetalle, EstadoCaso, EventoHistorialItem, NuevoCaso, Prioridad, TipoCaso } from '../types'
 import { api } from './client'
 
 export type { NuevoCaso } from '../types'
@@ -8,10 +8,12 @@ export function registrarCaso(datos: NuevoCaso) {
   return api<Caso>('/casos', { method: 'POST', body: datos })
 }
 
-/** Obtiene un caso desde GET /casos; cuando exista GET /casos/:id, solo cambiará esta función */
-export async function obtenerCaso(id: number): Promise<Caso | null> {
-  const casos = await api<Caso[]>('/casos')
-  return casos.find((caso) => caso.id === id) ?? null
+/**
+ * GET /casos/:id (HU-12): el caso con sus atenciones (la más reciente primero) y la solución vigente.
+ * El solicitante solo ve los suyos (RN-20). Errores: 400 VALIDACION, 404 NO_ENCONTRADO, 403 CASO_AJENO
+ */
+export function obtenerCaso(id: number): Promise<CasoDetalle> {
+  return api<CasoDetalle>(`/casos/${id}`)
 }
 
 /** GET /casos/:id/historial: eventos del caso. Agente, validador y administrador ven cualquiera; el solicitante, los suyos */

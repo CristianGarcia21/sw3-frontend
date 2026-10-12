@@ -5,6 +5,7 @@ import { Bandeja } from './pages/Bandeja'
 import { Categorias } from './pages/Categorias'
 import { Componentes } from './pages/Componentes'
 import { DetalleCaso } from './pages/DetalleCaso'
+import { DetalleMiCaso } from './pages/DetalleMiCaso'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { Inicio } from './pages/Inicio'
 import { MisCasos } from './pages/MisCasos'
@@ -40,7 +41,7 @@ export default function App() {
           path={RUTAS.detalleMiCaso}
           element={
             <RutaConRol roles={['SOLICITANTE']}>
-              <EnConstruccion titulo="Detalle de mi caso" issue="HU-12 · #55" />
+              <DetalleMiCaso />
             </RutaConRol>
           }
         />

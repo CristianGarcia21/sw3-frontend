@@ -4,17 +4,17 @@ import { registrarAtencion } from '../../api/casos'
 import { useAvisos } from '../../hooks/useAvisos'
 import { devolucionPendiente } from '../../hooks/useHistorial'
 import { useUsuarioActual } from '../../hooks/useUsuarioActual'
-import type { Atencion, Caso, EventoHistorialItem } from '../../types'
+import type { Atencion, CasoDetalle, EventoHistorialItem } from '../../types'
 import { formatearFecha } from '../../utils/etiquetas'
 import { Mensaje } from '../Mensaje'
 import { Boton, CampoArea, EstadoVacio, Tarjeta } from '../ui'
 
 interface Props {
-  caso: Caso
+  caso: CasoDetalle
   /** Historial del caso (null mientras carga): de ahí sale el comentario de la última devolución */
   eventos: EventoHistorialItem[] | null
-  /** Se llama tras registrar la atención para refrescar el caso y su historial */
-  onAtencionRegistrada: () => void
+  /** Se llama con la atención nueva para agregarla al caso y refrescar su historial */
+  onAtencionRegistrada: (atencion: Atencion) => void
 }
 
 type Campo = 'diagnostico' | 'solucion'
@@ -42,8 +42,8 @@ export function PanelAtencion({ caso, eventos, onAtencionRegistrada }: Props) {
   const [solucion, setSolucion] = useState('')
   const [errores, setErrores] = useState<Partial<Record<Campo, string>>>({})
   const [enviando, setEnviando] = useState(false)
-  // TODO(#54): cuando exista GET /casos/:id con `atenciones`, mostrar esas en vez de solo las registradas en esta sesión
-  const [atenciones, setAtenciones] = useState<Atencion[]>([])
+  // GET /casos/:id las trae de la más reciente a la más antigua: la primera es la solución vigente
+  const atenciones = caso.atenciones
 
   if (!usuario || usuario.rol === 'SOLICITANTE') return null
 
@@ -64,12 +64,11 @@ export function PanelAtencion({ caso, eventos, onAtencionRegistrada }: Props) {
     setEnviando(true)
     try {
       const atencion = await registrarAtencion(caso.id, { diagnostico: diagnostico.trim(), solucion: solucion.trim() })
-      setAtenciones((anteriores) => [atencion, ...anteriores])
       setDiagnostico('')
       setSolucion('')
       setErrores({})
       avisos.exito('Atención registrada', `Ya puedes enviar el caso #${caso.id} a validación.`)
-      onAtencionRegistrada()
+      onAtencionRegistrada(atencion)
     } catch (error: unknown) {
       if (error instanceof ApiError && error.error === 'VALIDACION') {
         setErrores({ diagnostico: error.detalleDe('diagnostico'), solucion: error.detalleDe('solucion') })
@@ -132,8 +131,8 @@ export function PanelAtencion({ caso, eventos, onAtencionRegistrada }: Props) {
       <div className="flex flex-col gap-3">
         <h3 className="text-[13px] font-semibold text-texto-suave">Atenciones registradas</h3>
         {atenciones.length === 0 ? (
-          <EstadoVacio icono="lista" titulo="Sin atenciones en esta sesión">
-            Las atenciones que se registren aquí aparecerán con su fecha y su agente. La más reciente es la solución vigente.
+          <EstadoVacio icono="lista" titulo="Todavía no hay atenciones">
+            Cuando se registre un diagnóstico y una solución, aparecerán aquí con su fecha y su agente. La más reciente es la solución vigente.
           </EstadoVacio>
         ) : (
           <ol className="flex flex-col gap-3">
