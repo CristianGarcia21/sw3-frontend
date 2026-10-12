@@ -1,4 +1,6 @@
+import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router'
+import { Cargando } from './components/Cargando'
 import { Layout } from './components/layout/Layout'
 import { RutaConRol } from './components/RutaConRol'
 import { Bandeja } from './pages/Bandeja'
@@ -12,6 +14,9 @@ import { NoEncontrada } from './pages/NoEncontrada'
 import { PorValidar } from './pages/PorValidar'
 import { RegistrarCaso } from './pages/RegistrarCaso'
 import { RUTAS } from './utils/navegacion'
+
+// Indicadores trae Recharts, que pesa bastante: se descarga solo al entrar a esa pantalla
+const Indicadores = lazy(() => import('./pages/Indicadores').then((m) => ({ default: m.Indicadores })))
 
 // Cada tarea reemplaza su <EnConstruccion> por la pantalla real
 export default function App() {
@@ -72,7 +77,9 @@ export default function App() {
           path={RUTAS.indicadores}
           element={
             <RutaConRol roles={['ADMINISTRADOR']}>
-              <EnConstruccion titulo="Indicadores" issue="HU-10 · #46" />
+              <Suspense fallback={<Cargando texto="Cargando indicadores…" />}>
+                <Indicadores />
+              </Suspense>
             </RutaConRol>
           }
         />

@@ -68,3 +68,12 @@ export function formatearAntiguedad(fecha: string | null | undefined, ahora: num
   if (horas < 24) return relativoCorto.format(-horas, 'hour')
   return relativoLargo.format(-Math.floor(horas / 24), 'day')
 }
+
+const formatoDecimal = new Intl.NumberFormat('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+
+/** Promedio en horas de los indicadores: "3,4 h", y desde 48 h también en días: "52,0 h (2,2 días)". Sin dato: "Sin datos" */
+export function formatearHoras(horas: number | null | undefined): string {
+  if (horas === null || horas === undefined || Number.isNaN(horas)) return 'Sin datos'
+  const enHoras = `${formatoDecimal.format(horas)} h`
+  return horas > 48 ? `${enHoras} (${formatoDecimal.format(horas / 24)} días)` : enHoras
+}
