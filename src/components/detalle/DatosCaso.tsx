@@ -4,19 +4,38 @@ import { Tarjeta } from '../ui'
 
 interface Props {
   caso: Caso
+  /** Detalle del solicitante (HU-12): sin el solicitante ni la fecha de asignación, y la de cierre solo si ya cerró */
+  paraSolicitante?: boolean
 }
 
-export function DatosCaso({ caso }: Props) {
-  const datos = [
-    { etiqueta: 'Tipo', valor: ETIQUETA_TIPO[caso.tipo] },
-    { etiqueta: 'Área', valor: caso.area.nombre },
-    { etiqueta: 'Categoría', valor: caso.categoria.nombre },
-    { etiqueta: 'Solicitante', valor: caso.solicitante.nombre },
-    { etiqueta: 'Agente', valor: caso.agente?.nombre ?? 'Sin asignar' },
-    { etiqueta: 'Creado', valor: formatearFecha(caso.fechaCreacion), fecha: caso.fechaCreacion },
-    { etiqueta: 'Asignado', valor: formatearFecha(caso.fechaAsignacion), fecha: caso.fechaAsignacion },
-    { etiqueta: 'Cerrado', valor: formatearFecha(caso.fechaCierre), fecha: caso.fechaCierre },
-  ]
+interface Dato {
+  etiqueta: string
+  valor: string
+  fecha?: string | null
+}
+
+export function DatosCaso({ caso, paraSolicitante = false }: Props) {
+  const datos: Dato[] = paraSolicitante
+    ? [
+        { etiqueta: 'Tipo', valor: ETIQUETA_TIPO[caso.tipo] },
+        { etiqueta: 'Área', valor: caso.area.nombre },
+        { etiqueta: 'Categoría', valor: caso.categoria.nombre },
+        { etiqueta: 'Creado', valor: formatearFecha(caso.fechaCreacion), fecha: caso.fechaCreacion },
+        { etiqueta: 'Agente responsable', valor: caso.agente?.nombre ?? 'Aún sin asignar' },
+      ]
+    : [
+        { etiqueta: 'Tipo', valor: ETIQUETA_TIPO[caso.tipo] },
+        { etiqueta: 'Área', valor: caso.area.nombre },
+        { etiqueta: 'Categoría', valor: caso.categoria.nombre },
+        { etiqueta: 'Solicitante', valor: caso.solicitante.nombre },
+        { etiqueta: 'Agente', valor: caso.agente?.nombre ?? 'Sin asignar' },
+        { etiqueta: 'Creado', valor: formatearFecha(caso.fechaCreacion), fecha: caso.fechaCreacion },
+        { etiqueta: 'Asignado', valor: formatearFecha(caso.fechaAsignacion), fecha: caso.fechaAsignacion },
+        { etiqueta: 'Cerrado', valor: formatearFecha(caso.fechaCierre), fecha: caso.fechaCierre },
+      ]
+  if (paraSolicitante && caso.estado === 'CERRADA' && caso.fechaCierre) {
+    datos.push({ etiqueta: 'Cerrado', valor: formatearFecha(caso.fechaCierre), fecha: caso.fechaCierre })
+  }
 
   return (
     <Tarjeta className="p-5 sm:p-6">

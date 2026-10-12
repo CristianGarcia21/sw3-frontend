@@ -5,13 +5,13 @@ import { validarCaso } from '../../api/casos'
 import { useAvisos } from '../../hooks/useAvisos'
 import { atencionVigente } from '../../hooks/useHistorial'
 import { useUsuarioActual } from '../../hooks/useUsuarioActual'
-import type { Caso, CasoDetalle, EventoHistorialItem } from '../../types'
+import type { CasoDetalle, EventoHistorialItem } from '../../types'
 import { formatearFecha } from '../../utils/etiquetas'
 import { RUTAS } from '../../utils/navegacion'
 import { Boton, CampoArea, Confirmacion, Esqueleto, Modal, Tarjeta } from '../ui'
 
 interface Props {
-  caso: Caso
+  caso: CasoDetalle
   /** Historial del caso (null mientras carga): de ahí salen el agente y la fecha de la solución vigente */
   eventos: EventoHistorialItem[] | null
   /** Vuelve a pedir el caso. Se usa si la validación falla porque el caso cambió mientras estaba abierto */
@@ -68,8 +68,7 @@ export function PanelValidacion({ caso, eventos, onRecargar }: Props) {
 
   if (usuario?.rol !== 'VALIDADOR' || caso.estado !== 'EN_VALIDACION') return null
 
-  // TODO(#54): cuando obtenerCaso use GET /casos/:id, el caso traerá solucionVigente con el diagnóstico y la solución
-  const solucion = (caso as Partial<CasoDetalle>).solucionVigente ?? null
+  const solucion = caso.solucionVigente
   const evento = eventos ? atencionVigente(eventos) : null
   const agente = solucion?.agente.nombre ?? evento?.usuario.nombre
   const fecha = solucion?.fecha ?? evento?.fecha

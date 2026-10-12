@@ -35,6 +35,13 @@ export const MENU_POR_ROL: Record<Rol, OpcionMenu[]> = {
   ],
 }
 
+/** Id de caso que viene en la URL (/casos/:id, /mis-casos/:id), o null si no es un entero positivo */
+export function idDeRuta(valor: string | undefined): number | null {
+  if (!valor) return null
+  const id = Number(valor)
+  return Number.isSafeInteger(id) && id > 0 ? id : null
+}
+
 /** Pantalla a la que lleva "/" según el rol */
 export function rutaInicial(rol: Rol): string {
   return MENU_POR_ROL[rol][0].ruta
