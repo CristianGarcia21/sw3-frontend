@@ -132,7 +132,28 @@ Validaciones: `nombre` con `trim()` y entre 2 y 100 caracteres, `descripcion` de
 }
 ```
 
-`GET /casos/{id}` agrega `atenciones: [{ id, diagnostico, solucion, fecha, agente }]` ordenadas de la más reciente a la más antigua.
+### GET /casos/{id}
+
+Detalle de un caso: el objeto Caso más sus atenciones y la solución vigente. Requiere `X-Usuario-Id`. Un solicitante solo puede ver sus propios casos (RN-20); agente, validador y administrador ven cualquiera.
+
+```json
+{
+  "id": 7,
+  "…": "resto de campos del objeto Caso",
+  "atenciones": [
+    { "id": 12, "diagnostico": "El AP tenía el firmware desactualizado.", "solucion": "Se actualizó el firmware.",
+      "fecha": "2026-10-02T10:30:00Z", "agente": { "id": 3, "nombre": "Andrés Pérez" } },
+    { "id": 9, "diagnostico": "El AP del segundo piso estaba apagado.", "solucion": "Se reinició el AP.",
+      "fecha": "2026-10-01T16:00:00Z", "agente": { "id": 3, "nombre": "Andrés Pérez" } }
+  ],
+  "solucionVigente": { "id": 12, "diagnostico": "…", "solucion": "…", "fecha": "2026-10-02T10:30:00Z", "agente": { "id": 3, "nombre": "Andrés Pérez" } }
+}
+```
+
+- `atenciones`: de la más reciente a la más antigua (un caso tiene varias si fue devuelto). `[]` si no tiene.
+- `solucionVigente`: la atención más reciente (la primera de `atenciones`), o `null` si no hay ninguna. Si el caso fue devuelto y aún no tiene una atención nueva, sigue siendo la devuelta; el historial muestra la devolución.
+
+Errores: `400 VALIDACION` (id no numérico), `404 NO_ENCONTRADO`, `403 CASO_AJENO` (solicitante que no es dueño).
 
 ### GET /casos
 
