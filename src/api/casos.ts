@@ -1,0 +1,84 @@
+import type { Atencion, Caso, CasoDetalle, EstadoCaso, EventoHistorialItem, NuevoCaso, Prioridad, TipoCaso } from '../types'
+import { api } from './client'
+
+export type { NuevoCaso } from '../types'
+
+/** POST /casos (solo SOLICITANTE) */
+export function registrarCaso(datos: NuevoCaso) {
+  return api<Caso>('/casos', { method: 'POST', body: datos })
+}
+
+/**
+ * GET /casos/:id (HU-12): el caso con sus atenciones (la más reciente primero) y la solución vigente.
+ * El solicitante solo ve los suyos (RN-20). Errores: 400 VALIDACION, 404 NO_ENCONTRADO, 403 CASO_AJENO
+ */
+export function obtenerCaso(id: number): Promise<CasoDetalle> {
+  return api<CasoDetalle>(`/casos/${id}`)
+}
+
+/** GET /casos/:id/historial: eventos del caso. Agente, validador y administrador ven cualquiera; el solicitante, los suyos */
+export function obtenerHistorial(id: number): Promise<EventoHistorialItem[]> {
+  return api<EventoHistorialItem[]>(`/casos/${id}/historial`)
+}
+
+/** POST /casos/:id/atencion (HU-06): solo el agente asignado y con el caso En atención (RN-12) */
+export function registrarAtencion(id: number, datos: { diagnostico: string; solucion: string }): Promise<Atencion> {
+  return api<Atencion>(`/casos/${id}/atencion`, { method: 'POST', body: datos })
+}
+
+/** Cuerpo de POST /casos/:id/validacion. Para devolver, el comentario es obligatorio y de mínimo 10 caracteres (RN-15) */
+export interface Validacion {
+  aprobado: boolean
+  comentario?: string
+}
+
+/** POST /casos/:id/validacion (HU-07, solo VALIDADOR): aprobar cierra el caso (RN-14); devolver lo regresa a En atención (RN-15) */
+export function validarCaso(id: number, datos: Validacion): Promise<Caso> {
+  return api<Caso>(`/casos/${id}/validacion`, { method: 'POST', body: datos })
+}
+
+/** PATCH /casos/:id/estado (transiciones manuales del agente) */
+export function cambiarEstado(id: number, estado: EstadoCaso): Promise<Caso> {
+  return api<Caso>(`/casos/${id}/estado`, { method: 'PATCH', body: { estado } })
+}
+
+/** PATCH /casos/:id/asignar (solo AGENTE). Para asignarse a sí mismo se manda el propio id */
+export function asignarCaso(id: number, agenteId: number): Promise<Caso> {
+  return api<Caso>(`/casos/${id}/asignar`, { method: 'PATCH', body: { agenteId } })
+}
+
+/** Cuerpo de PATCH /casos/:id/clasificacion. areaId y categoriaId van juntos (RN-03) */
+export interface CambiosClasificacion {
+  tipo?: TipoCaso
+  prioridad?: Prioridad
+  areaId?: number
+  categoriaId?: number
+}
+
+/** PATCH /casos/:id/clasificacion (solo AGENTE, en Pendiente o En análisis: RN-08) */
+export function reclasificarCaso(id: number, cambios: CambiosClasificacion): Promise<Caso> {
+  return api<Caso>(`/casos/${id}/clasificacion`, { method: 'PATCH', body: cambios })
+}
+
+/** Parámetros de GET /casos. Cada tarea agrega los que implemente el backend (ver docs/03-api.md) */
+export interface FiltrosCasos {
+  orden?: 'fecha_desc' | 'prioridad'
+  abiertos?: boolean
+  agenteId?: number
+  sinAgente?: boolean
+  /** Varios valores viajan separados por coma (estado=PENDIENTE,EN_ANALISIS) */
+  estado?: EstadoCaso[]
+  tipo?: TipoCaso[]
+  prioridad?: Prioridad[]
+  areaId?: number
+  categoriaId?: number
+  /** Texto que se busca en el título */
+  q?: string
+}
+
+/** GET /casos: a un SOLICITANTE el backend solo le devuelve sus casos */
+export function listarCasos(filtros: FiltrosCasos = {}) {
+  const query: Record<string, string | number | boolean | undefined> = {}
+  for (const [clave, valor] of Object.entries(filtros)) query[clave] = Array.isArray(valor) ? valor.join(',') : valor
+  return api<Caso[]>('/casos', { query })
+}

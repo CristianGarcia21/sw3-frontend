@@ -56,7 +56,7 @@ El frontend se encarga de mostrarlos con texto legible ("En análisis", "Solicit
 
 | Método | Ruta | Uso | Historia |
 |---|---|---|---|
-| GET | `/usuarios` | Lista de usuarios de prueba (para el selector) | Base |
+| GET | `/usuarios?rol=` | Usuarios de prueba activos (para el selector); `rol` filtra por rol | Base |
 | GET | `/areas` | Áreas activas | HU-01 |
 | GET | `/categorias?areaId=&activa=` | Categorías, filtrables por área | HU-01, HU-11 |
 | POST | `/categorias` | Crear categoría | HU-11 |
@@ -73,6 +73,29 @@ El frontend se encarga de mostrarlos con texto legible ("En análisis", "Solicit
 | POST | `/casos/{id}/validacion` | Aprobar o devolver | HU-07 |
 | GET | `/casos/{id}/historial` | Historial del caso | HU-08 |
 | GET | `/indicadores` | Indicadores del servicio | HU-10 |
+
+### Categorías (HU-11)
+
+Las cuatro rutas de escritura son solo para `ADMINISTRADOR`. `GET /categorias` sigue siendo público.
+
+`GET /categorias` devuelve `{ id, areaId, nombre, descripcion, activa, totalCasos }`. `totalCasos` es el número de casos que usan la categoría (activos o cerrados); el front lo usa para saber si se puede borrar.
+
+| Ruta | Body | Respuesta |
+|---|---|---|
+| `POST /categorias` | `{ "areaId": 2, "nombre": "Licencias", "descripcion": "…" }` (`descripcion` opcional) | `201` categoría creada, activa, con `totalCasos: 0` |
+| `PUT /categorias/{id}` | `{ "nombre": "…", "descripcion": "…" }` | `200` categoría actualizada. No cambia el área (si hace falta, se crea otra). Si se omite `descripcion`, queda en `null` |
+| `PATCH /categorias/{id}/activa` | `{ "activa": false }` | `200` categoría actualizada. Los casos que ya la usaban siguen mostrándola |
+| `DELETE /categorias/{id}` | – | `204` |
+
+Validaciones: `nombre` con `trim()` y entre 2 y 100 caracteres, `descripcion` de hasta 255, `areaId` entero positivo que exista.
+
+| Situación | Respuesta |
+|---|---|
+| Nombre vacío o muy largo, `areaId` o `activa` inválidos | `400 VALIDACION` |
+| `areaId` o categoría inexistente | `404 NO_ENCONTRADO` |
+| No es `ADMINISTRADOR` | `403 ROL_NO_PERMITIDO` |
+| Nombre repetido en el área, sin distinguir mayúsculas (`wi-fi` choca con `Wi-Fi`; en otra área sí se permite) | `409 CATEGORIA_DUPLICADA` |
+| `DELETE` con casos asociados | `409 CATEGORIA_CON_CASOS` ("Tiene N casos; desactívala en vez de borrarla") |
 
 ### POST /casos
 
@@ -109,13 +132,80 @@ El frontend se encarga de mostrarlos con texto legible ("En análisis", "Solicit
 }
 ```
 
-`GET /casos/{id}` agrega `atenciones: [{ id, diagnostico, solucion, fecha, agente }]` ordenadas de la más reciente a la más antigua.
+### GET /casos/{id}
+
+Detalle de un caso: el objeto Caso más sus atenciones y la solución vigente. Requiere `X-Usuario-Id`. Un solicitante solo puede ver sus propios casos (RN-20); agente, validador y administrador ven cualquiera.
+
+```json
+{
+  "id": 7,
+  "…": "resto de campos del objeto Caso",
+  "atenciones": [
+    { "id": 12, "diagnostico": "El AP tenía el firmware desactualizado.", "solucion": "Se actualizó el firmware.",
+      "fecha": "2026-10-02T10:30:00Z", "agente": { "id": 3, "nombre": "Andrés Pérez" } },
+    { "id": 9, "diagnostico": "El AP del segundo piso estaba apagado.", "solucion": "Se reinició el AP.",
+      "fecha": "2026-10-01T16:00:00Z", "agente": { "id": 3, "nombre": "Andrés Pérez" } }
+  ],
+  "solucionVigente": { "id": 12, "diagnostico": "…", "solucion": "…", "fecha": "2026-10-02T10:30:00Z", "agente": { "id": 3, "nombre": "Andrés Pérez" } }
+}
+```
+
+- `atenciones`: de la más reciente a la más antigua (un caso tiene varias si fue devuelto). `[]` si no tiene.
+- `solucionVigente`: la atención más reciente (la primera de `atenciones`), o `null` si no hay ninguna. Si el caso fue devuelto y aún no tiene una atención nueva, sigue siendo la devuelta; el historial muestra la devolución.
+
+Errores: `400 VALIDACION` (id no numérico), `404 NO_ENCONTRADO`, `403 CASO_AJENO` (solicitante que no es dueño).
 
 ### GET /casos
 
-Query params opcionales y combinables: `estado`, `tipo`, `areaId`, `categoriaId`, `prioridad`, `solicitanteId`, `agenteId`, `q` (texto en título), `orden` (`fecha_desc` por defecto, `prioridad`).
+Query params opcionales. Todos se combinan con Y lógico; si ningún caso coincide, la respuesta es `200 []`.
 
-Si el usuario actual es solicitante, el backend ignora `solicitanteId` y siempre filtra por él (RN-20).
+| Parámetro | Valores | Efecto |
+|---|---|---|
+| `estado` | Uno o varios separados por coma (`estado=PENDIENTE,EN_ANALISIS`) | Casos en alguno de esos estados |
+| `tipo` | `INCIDENTE`, `SOLICITUD` (uno o ambos) | Casos de ese tipo |
+| `prioridad` | `P1`, `P2`, `P3` (uno o varios: `prioridad=P1,P2`) | Casos con alguna de esas prioridades |
+| `areaId` | Entero positivo | Casos cuya categoría pertenece a esa área |
+| `categoriaId` | Entero positivo | Casos de esa categoría. Si no pertenece a `areaId`, la respuesta es `200 []` |
+| `q` | Texto, máximo 180 caracteres | Busca en el título sin distinguir mayúsculas. Es literal: `wifi` no encuentra "Wi-Fi" |
+| `solicitanteId` | Entero positivo | Casos de ese solicitante (ver RN-20 abajo) |
+| `agenteId` | Entero positivo | Casos asignados a ese agente |
+| `sinAgente` | `true` / `false` | `true`: solo casos sin agente (tiene prioridad sobre `agenteId`). `false` u omitido: sin filtro |
+| `abiertos` | `true` / `false` | `true`: excluye los casos `CERRADA`. `false` u omitido: sin filtro |
+| `orden` | `fecha_desc` (por defecto), `prioridad` | `fecha_desc`: más recientes primero. `prioridad`: P1 → P3 y, dentro de cada prioridad, el más antiguo primero (CP-13) |
+
+`estado`, `tipo` y `prioridad` también se aceptan repetidos (`prioridad=P1&prioridad=P2`). Un parámetro vacío (`?areaId=`) se ignora.
+
+Un valor que no pertenece a la lista, no es numérico o está fuera de rango responde `400 VALIDACION`, con el parámetro en `detalles[].campo`.
+
+Pestañas de la bandeja del agente (HU-03):
+- **Pendientes:** `GET /api/casos?abiertos=true&orden=prioridad`
+- **Asignados a mí:** `GET /api/casos?abiertos=true&agenteId=<miId>&orden=prioridad`
+
+Si el usuario actual es solicitante, el backend ignora `solicitanteId` y siempre filtra por él (RN-20); los demás filtros se aplican sobre sus casos.
+
+### Rutas con `{id}`
+
+En todas las rutas `/casos/{id}/…`, un `id` que no es un entero positivo responde `400 VALIDACION` con `detalles[].campo = "id"`, y un caso que no existe, `404 NO_ENCONTRADO`. Las tablas de errores de abajo no repiten estos dos casos ni el `401 USUARIO_REQUERIDO`.
+
+### PATCH /casos/{id}/clasificacion
+
+El agente corrige la clasificación mientras analiza el caso (HU-05, RN-08). Se envía solo lo que cambia; `areaId` y `categoriaId` van siempre juntos para poder comprobar que la categoría pertenece al área (RN-03).
+
+```json
+{ "prioridad": "P1" }
+{ "tipo": "SOLICITUD", "areaId": 3, "categoriaId": 8 }
+```
+
+Responde `200` con el caso actualizado y crea un evento `RECLASIFICACION` cuyo `comentario` describe los cambios, separados por `; `: `prioridad: P3 → P1`, `tipo: INCIDENTE → SOLICITUD`, `categoría: Proyector (Hardware) → Wi-Fi (Red y conectividad)`. Si los valores enviados son los que el caso ya tiene, responde `200` con el caso sin crear evento.
+
+| Situación | Respuesta |
+|---|---|
+| Body vacío, valores fuera de la lista, o `areaId` sin `categoriaId` (o al revés) | `400 VALIDACION` |
+| No es `AGENTE` | `403 ROL_NO_PERMITIDO` |
+| Caso `CERRADA` | `409 CASO_CERRADO` |
+| Caso en un estado distinto de `PENDIENTE` o `EN_ANALISIS` | `409 ESTADO_NO_PERMITE_OPERACION` |
+| La categoría no existe, está inactiva o no es del área enviada | `409 CATEGORIA_INVALIDA` |
+
 
 ### PATCH /casos/{id}/asignar
 
@@ -123,7 +213,15 @@ Si el usuario actual es solicitante, el backend ignora `solicitanteId` y siempre
 { "agenteId": 3 }
 ```
 
-Si el agente se asigna a sí mismo, manda su propio id.
+Si el agente se asigna a sí mismo, manda su propio id. Responde `200` con el caso actualizado (`agente` y `fechaAsignacion`) y crea un evento `ASIGNACION` con `comentario` `"Asignado a <nombre>"` o, si ya tenía agente, `"Reasignado de <anterior> a <nuevo>"`. La línea de tiempo del front lee ese texto. Asignar el agente que el caso ya tiene responde `200` sin evento y sin cambiar la fecha.
+
+| Situación | Respuesta |
+|---|---|
+| Falta `agenteId` o no es un entero positivo | `400 VALIDACION` |
+| No es `AGENTE` | `403 ROL_NO_PERMITIDO` |
+| Caso `CERRADA` | `409 CASO_CERRADO` |
+| Caso en un estado distinto de `PENDIENTE` o `EN_ANALISIS` (RN-19) | `409 ESTADO_NO_PERMITE_OPERACION` |
+| `agenteId` no es un usuario activo con rol `AGENTE` (RN-18) | `409 AGENTE_INVALIDO` |
 
 ### PATCH /casos/{id}/estado
 
@@ -131,7 +229,18 @@ Si el agente se asigna a sí mismo, manda su propio id.
 { "estado": "EN_ATENCION" }
 ```
 
-No acepta `CERRADA`. Devuelve `409` si la transición no está permitida.
+Solo para `AGENTE`. Responde `200` con el caso actualizado y crea un evento `CAMBIO_ESTADO` con el estado anterior y el nuevo. Las únicas transiciones de esta ruta son `PENDIENTE → EN_ANALISIS → EN_ATENCION → EN_VALIDACION`; las salidas de `EN_VALIDACION` son de `POST /validacion`. La tabla vive en `src/domain/estados.ts` del backend.
+
+| Situación | Respuesta |
+|---|---|
+| `estado` falta o no es uno de los cinco valores | `400 VALIDACION` |
+| No es `AGENTE` | `403 ROL_NO_PERMITIDO` |
+| Caso `CERRADA` (RN-10) | `409 CASO_CERRADO` |
+| `estado: CERRADA`, saltarse un estado, retroceder, pedir el mismo estado o salir de `EN_VALIDACION` (RN-09, RN-14) | `409 TRANSICION_INVALIDA` |
+| A `EN_ATENCION` sin agente asignado (RN-11) | `409 SIN_AGENTE_ASIGNADO` |
+| A `EN_VALIDACION` sin una atención posterior a la última devolución (RN-13) | `409 SIN_SOLUCION` |
+
+> Pendiente: la tabla de transiciones de [02-requisitos.md](02-requisitos.md) dice que `En análisis → En atención` y `En atención → En validación` las hace el **agente asignado**. Hoy el backend solo comprueba que el usuario sea `AGENTE`, no que sea el asignado.
 
 ### POST /casos/{id}/atencion
 
@@ -139,13 +248,39 @@ No acepta `CERRADA`. Devuelve `409` si la transición no está permitida.
 { "diagnostico": "El AP del segundo piso estaba apagado.", "solucion": "Se reinició el AP y se verificó conexión." }
 ```
 
+Los dos campos son obligatorios, con mínimo 10 caracteres sin contar espacios al inicio y al final; se guardan recortados. Responde `201` con la atención creada y crea el evento `ATENCION`. El estado del caso no cambia: el agente lo envía después con `PATCH /estado` a `EN_VALIDACION`.
+
+```json
+{ "id": 3, "casoId": 14, "diagnostico": "…", "solucion": "…", "fecha": "2026-10-12T21:33:20Z", "agente": { "id": 3, "nombre": "Andrés Pérez" } }
+```
+
+| Situación | Respuesta |
+|---|---|
+| Falta un campo o tiene menos de 10 caracteres | `400 VALIDACION` (con `detalles[].campo` = `diagnostico` o `solucion`) |
+| No es `AGENTE` | `403 ROL_NO_PERMITIDO` |
+| Es agente pero no el asignado al caso (RN-12) | `403 NO_ES_AGENTE_ASIGNADO` |
+| Caso `CERRADA` | `409 CASO_CERRADO` |
+| Caso en un estado distinto de `EN_ATENCION` (RN-12) | `409 ESTADO_NO_PERMITE_OPERACION` |
+
 ### POST /casos/{id}/validacion
 
 ```json
 { "aprobado": false, "comentario": "El usuario sigue sin conexión en el aula 204." }
 ```
 
-`aprobado: true` cierra el caso. `aprobado: false` exige `comentario` y lo devuelve a `EN_ATENCION`.
+Solo para `VALIDADOR`. Responde `200` con el caso actualizado.
+
+- `aprobado: true`: el caso pasa a `CERRADA`, se guarda `fechaCierre` y se crea el evento `APROBACION`. El `comentario` es opcional.
+- `aprobado: false`: exige `comentario` de al menos 10 caracteres. El caso vuelve a `EN_ATENCION` con el mismo agente y se crea el evento `DEVOLUCION` con el comentario. Para volver a `EN_VALIDACION` el agente debe registrar una atención nueva; si no, `409 SIN_SOLUCION`.
+
+| Situación | Respuesta |
+|---|---|
+| Falta `aprobado`, o devolución sin comentario válido | `400 VALIDACION` |
+| El caso no existe | `404 NO_ENCONTRADO` |
+| No es `VALIDADOR` | `403 ROL_NO_PERMITIDO` |
+| Caso `CERRADA` | `409 CASO_CERRADO` |
+| Caso en un estado distinto de `EN_VALIDACION` | `409 ESTADO_NO_PERMITE_OPERACION` |
+| El validador registró la atención vigente | `409 VALIDADOR_ES_AGENTE` |
 
 ### GET /casos/{id}/historial
 
@@ -158,9 +293,13 @@ No acepta `CERRADA`. Devuelve `409` si la transición no está permitida.
 
 Eventos: `CREACION`, `RECLASIFICACION`, `ASIGNACION`, `CAMBIO_ESTADO`, `ATENCION`, `APROBACION`, `DEVOLUCION`.
 
+Agente, validador y administrador ven el historial de cualquier caso; un solicitante solo el de sus casos, si no responde `403 CASO_AJENO` (RN-20). Igual que en `GET /casos/{id}`, el `404` se comprueba antes del `403`, para que un solicitante no pueda averiguar qué ids existen.
+
+`comentario` trae el texto de la asignación (`"Asignado a …"`, `"Reasignado de … a …"`), el detalle de la reclasificación o el motivo de la devolución; en los demás eventos es `null`.
+
 ### GET /indicadores
 
-Acepta los mismos filtros de fecha `desde` y `hasta` (opcionales).
+Solo para `ADMINISTRADOR`. Acepta los filtros opcionales `desde` y `hasta` (`YYYY-MM-DD`), que filtran por `fechaCreacion` e incluyen ambos días.
 
 ```json
 {
@@ -168,9 +307,54 @@ Acepta los mismos filtros de fecha `desde` y `hasta` (opcionales).
   "porEstado": { "PENDIENTE": 5, "EN_ANALISIS": 3, "EN_ATENCION": 6, "EN_VALIDACION": 2, "CERRADA": 26 },
   "porTipo": { "INCIDENTE": 30, "SOLICITUD": 12 },
   "porPrioridad": { "P1": 8, "P2": 25, "P3": 9 },
-  "porArea": [{ "area": "Red y conectividad", "cantidad": 15 }],
+  "porArea": [
+    { "areaId": 1, "area": "Hardware", "cantidad": 9 },
+    { "areaId": 3, "area": "Red y conectividad", "cantidad": 15 }
+  ],
   "promedioHorasHastaAsignacion": 3.4,
   "promedioHorasResolucion": 27.8,
   "devoluciones": 4
 }
 ```
+
+- `porEstado`, `porTipo` y `porPrioridad` traen siempre todas las llaves del enum, en 0 si no hay casos.
+- `porArea` trae las 5 áreas, ordenadas por `areaId`, aunque tengan 0 casos. El ejemplo muestra solo dos.
+- `promedioHorasHastaAsignacion`: promedio de `fechaAsignacion − fechaCreacion` de los casos con agente, en horas con 1 decimal. `null` si no hay ninguno.
+- `promedioHorasResolucion`: promedio de `fechaCierre − fechaCreacion` de los casos `CERRADA`, en horas con 1 decimal. `null` si no hay ninguno.
+- `devoluciones`: número de eventos `DEVOLUCION` del rango. Se filtra por la fecha del evento, no por la creación del caso.
+- Los días se toman en UTC: `desde` empieza a las `00:00:00Z` y `hasta` termina a las `23:59:59.999Z`.
+
+#### Cómo se calcula
+
+Todos los indicadores salen de la tabla `caso` (y `historial` para las devoluciones) y respetan el filtro `desde`/`hasta` sobre la fecha de creación del caso, salvo `devoluciones`, que usa la fecha del evento. Las horas se calculan como diferencia entre dos fechas dividida entre 3600, se promedian y se redondean a 1 decimal.
+
+| Indicador | Fórmula | Qué casos entran | Unidad | Sin datos |
+|---|---|---|---|---|
+| `total` | Número de casos | Todos los creados en el rango, en cualquier estado | Casos | `0` |
+| `porEstado` | Casos agrupados por `estado` | Los mismos del `total` | Casos | `0` en cada estado |
+| `porTipo` | Casos agrupados por `tipo` | Los mismos del `total` | Casos | `0` en cada tipo |
+| `porPrioridad` | Casos agrupados por `prioridad` | Los mismos del `total` | Casos | `0` en cada prioridad |
+| `porArea` | Casos agrupados por el área de su categoría (el caso no guarda el área, RN-03) | Los mismos del `total` | Casos | `cantidad: 0`; siempre salen las 5 áreas |
+| `promedioHorasHastaAsignacion` | Promedio de `fechaAsignacion − fechaCreacion` | Solo los casos con `fechaAsignacion` (asignados alguna vez). Si un caso se reasigna, cuenta la fecha de la última asignación | Horas, 1 decimal | `null` |
+| `promedioHorasResolucion` | Promedio de `fechaCierre − fechaCreacion` | Solo los casos `CERRADA` (RN-14). Los casos abiertos no entran | Horas, 1 decimal | `null` |
+| `devoluciones` | Número de eventos `DEVOLUCION` del historial | Los eventos cuya fecha cae en el rango, aunque el caso se haya creado fuera de él | Eventos | `0` |
+
+Ejemplo con 5 casos creados el 05/10/2026:
+
+| Caso | Estado | Creado | Asignado | Cerrado | Horas hasta asignación | Horas de resolución |
+|---|---|---|---|---|---|---|
+| 1 | CERRADA | 08:00 | 10:00 | 18:00 | 2 | 10 |
+| 2 | CERRADA | 08:00 | 14:00 | 04:00 del día 06 | 6 | 20 |
+| 3 | EN_ATENCION | 09:00 | 10:00 | – | 1 | – |
+| 4 | PENDIENTE | 10:00 | – | – | – | – |
+| 5 | EN_VALIDACION | 11:00 | 14:00 | – | 3 | – |
+
+- `promedioHorasHastaAsignacion` = (2 + 6 + 1 + 3) / 4 = **3,0**. El caso 4 no tiene asignación y no entra.
+- `promedioHorasResolucion` = (10 + 20) / 2 = **15,0**. Solo entran los casos 1 y 2.
+- `total` = **5** y `porEstado` = `PENDIENTE 1, EN_ATENCION 1, EN_VALIDACION 1, CERRADA 2`.
+
+Dos casos del rango tuvieron una devolución en el historial: `devoluciones` = **2**. Si se filtra `desde=2026-10-06&hasta=2026-10-06`, no entra ningún caso: `total` = 0, los dos promedios son `null` y `devoluciones` = 0.
+
+No confundir con las métricas del flujo del equipo: los indicadores del producto miden **cuánto tardan los casos de soporte** en asignarse y resolverse, y las métricas de [07-metricas.md](07-metricas.md) (Lead y Cycle Time) miden **cuánto tardó el equipo en terminar las historias** del backlog.
+
+Errores: `400 VALIDACION` (fecha con otro formato o inexistente, parámetro repetido, o `desde` posterior a `hasta`) y `403 ROL_NO_PERMITIDO` (no es administrador).

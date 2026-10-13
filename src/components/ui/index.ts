@@ -1,0 +1,10 @@
+// Componentes genéricos del sistema de diseño. Guía de uso: docs/08-diseno.md
+export { Boton } from './Boton'
+export { Campo, CampoArea, CampoTexto } from './Campo'
+export { Confirmacion } from './Confirmacion'
+export { Icono, type NombreIcono } from './Icono'
+export { Interruptor } from './Interruptor'
+export { FiltroMultiple, ListaDesplegable, type Opcion } from './ListaDesplegable'
+export { Modal } from './Modal'
+export { Segmentado } from './Segmentado'
+export { Esqueleto, EstadoVacio, Tarjeta } from './Tarjeta'

@@ -22,7 +22,7 @@ Los seis desarrollan. Los roles adicionales de Tania, Juan Fernando y Juan Diego
 - React 19 + TypeScript
 - Vite
 - React Router (rutas)
-- Tailwind CSS (estilos)
+- Tailwind CSS (estilos), con el sistema de diseño propio descrito en [docs/08-diseno.md](docs/08-diseno.md)
 - Recharts (gráficos de indicadores)
 - `fetch` envuelto en `src/api/client.ts` para llamar a la API, sin librerías extra
 - oxlint
@@ -43,10 +43,11 @@ Los formularios usan estado de React y validación propia (son pocos campos). No
 | `/validacion` | Casos por validar (HU-07) | Validador |
 | `/admin/indicadores` | Indicadores (HU-10) | Administrador |
 | `/admin/categorias` | Administrar categorías (HU-11) | Administrador |
+| `/componentes` | Galería del sistema de diseño (no sale en el menú ni necesita backend) | Todos |
 
 ## Cómo ejecutarlo
 
-Requisitos: Node.js 24 o superior y el backend corriendo (ver el README de `sw3-backend`).
+Requisitos: Node.js 24 o superior y el backend corriendo (ver el README de `CampusHelp-backend`).
 
 ```bash
 git clone https://github.com/CristianGarcia21/sw3-frontend.git
@@ -56,11 +57,49 @@ cp .env.example .env      # ajustar VITE_API_URL si el backend no está en el pu
 npm run dev
 ```
 
-La app queda en http://localhost:5173. En el backend hay que agregar ese origen en `ALLOWED_ORIGINS`, si no el navegador bloquea las peticiones por CORS.
+La app queda disponible en http://localhost:5173. En el backend hay que agregar ese origen en `ALLOWED_ORIGINS`, si no el navegador bloquea las peticiones por CORS.
+
+### Levantar todo el proyecto (Backend + Frontend juntos)
+
+Para levantar el sistema completo desde cero, sigue este orden secuencial:
+
+1. **Base de datos (PostgreSQL):**
+   ```bash
+   cd ../CampusHelp-backend
+   docker compose up -d postgres
+   ```
+2. **Backend (Configuración, Migración y Seed):**
+   ```bash
+   cp .env.example .env
+   npm install
+   npx prisma db migrate   # crea las tablas y enums en PostgreSQL
+   npm run seed            # inserta las 5 áreas, 16 categorías y 7 usuarios de prueba
+   npm run dev             # queda escuchando en http://localhost:3000/api
+   ```
+3. **Frontend:**
+   En otra terminal:
+   ```bash
+   cd ../sw3-frontend
+   cp .env.example .env    # verifica VITE_API_URL="http://localhost:3000/api"
+   npm install
+   npm run dev             # queda disponible en http://localhost:5173
+   ```
+4. **Abrir navegador:** Ingresa a http://localhost:5173 y selecciona un usuario de prueba en la barra superior.
+
+### Problemas comunes y soluciones
+
+- **CORS (`Cross-Origin Request Blocked`):**
+  Asegúrate de que en el archivo `.env` del backend esté configurado `ALLOWED_ORIGINS="http://localhost:5173"`. Si cambiaste de puerto en el front, agrégalo a esa variable y reinicia el backend.
+- **Puerto 5173 o 3000 ocupado (`EADDRINUSE`):**
+  Identifica qué proceso lo está ocupando con `lsof -i :5173` y ciérralo con `kill -9 <PID>`, o cambia el puerto en la configuración.
+- **Selector de usuarios vacío o error 401 `USUARIO_REQUERIDO`:**
+  Ocurre cuando no se han cargado los usuarios de prueba en la base de datos. En el backend, corre `npm run seed`.
+- **Error `relation "caso" does not exist` al hacer peticiones:**
+  Falta ejecutar la migración inicial de la base de datos. En el backend, ejecuta `npx prisma db migrate`.
 
 ### Scripts
 
-- `npm run dev`: servidor de desarrollo.
+- `npm run dev`: servidor de desarrollo con Vite.
 - `npm run build`: compila TypeScript y genera `dist/`.
 - `npm run lint`: revisa el código con oxlint.
 - `npm run preview`: sirve la versión compilada.
@@ -71,7 +110,9 @@ La app queda en http://localhost:5173. En el backend hay que agregar ese origen 
 src/
   api/         cliente HTTP y llamadas a sw3-backend
   components/  componentes reutilizables
+    ui/        componentes genéricos del sistema de diseño (botones, campos, listas, modales…)
   pages/       pantallas (registro, bandeja, detalle, validación, indicadores…)
+  context/     proveedores de estado global (usuario de prueba, tema, avisos)
   hooks/       hooks propios
   types/       tipos compartidos (Caso, Usuario, Categoria…)
 docs/          documentación del taller (requisitos, backlog, pruebas, métricas, sprints)
@@ -90,8 +131,16 @@ docs/          documentación del taller (requisitos, backlog, pruebas, métrica
 | [05-trazabilidad](docs/05-trazabilidad.md) | Historia ↔ reglas ↔ pruebas ↔ endpoints ↔ pantallas |
 | [06-pruebas](docs/06-pruebas.md) | Casos de prueba, resultados y registro de defectos |
 | [07-metricas](docs/07-metricas.md) | Cómo registramos WIP, Throughput, Lead/Cycle Time, defectos y bloqueos |
+| [08-diseno](docs/08-diseno.md) | Guía de diseño: colores, vidrio, componentes y reglas para que todas las pantallas se vean igual |
+| [09-indicadores](docs/09-indicadores.md) | Cómo se calcula cada indicador del servicio y la diapositiva de la presentación |
 | [sprints/](docs/sprints/) | Planning, Review y Retrospectiva de cada sprint |
 | [recursos/](docs/recursos/) | Material entregado por el docente |
+
+## Diseño y trabajo con IA
+
+Las pantallas siguen la [guía de diseño](docs/08-diseno.md). Los componentes genéricos se ven funcionando en `/componentes`.
+
+Si programas con un asistente de IA, las reglas del proyecto están en [AGENTS.md](AGENTS.md) y la mayoría de herramientas las leen solas. La skill `apple-design` está en `.agents/skills/`.
 
 ## Tablero ScrumBan
 
