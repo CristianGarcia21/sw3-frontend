@@ -84,7 +84,7 @@ import { Boton, Campo, CampoArea, CampoTexto, Confirmacion, Esqueleto, EstadoVac
 | Una tarea que bloquea | `Modal` | Formularios cortos: asignar, devolver, registrar solución |
 | Confirmar algo que no se deshace | `Confirmacion` | Solo para eso. Ver "Confirmaciones" abajo |
 | Contar el resultado de una acción | `useAvisos()` | Ver "Avisos" abajo |
-| Un mensaje fijo en la página | `Mensaje` | Errores de carga, falta de permisos |
+| Un mensaje fijo en la página | `Mensaje` | Errores de carga, falta de permisos. `tipo`: `error`, `info`, `exito` o `advertencia` (ámbar, por ejemplo el motivo de una devolución) |
 | Un contenedor de contenido | `Tarjeta` | Tablas, formularios, bloques de detalle |
 | Una lista sin datos | `EstadoVacio` | Dice qué va a aparecer ahí |
 | Algo que está cargando | `Esqueleto` o `Cargando` | `Esqueleto` cuando conoces la forma del contenido |

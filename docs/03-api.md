@@ -56,7 +56,7 @@ El frontend se encarga de mostrarlos con texto legible ("En análisis", "Solicit
 
 | Método | Ruta | Uso | Historia |
 |---|---|---|---|
-| GET | `/usuarios` | Lista de usuarios de prueba (para el selector) | Base |
+| GET | `/usuarios?rol=` | Usuarios de prueba activos (para el selector); `rol` filtra por rol | Base |
 | GET | `/areas` | Áreas activas | HU-01 |
 | GET | `/categorias?areaId=&activa=` | Categorías, filtrables por área | HU-01, HU-11 |
 | POST | `/categorias` | Crear categoría | HU-11 |
@@ -183,6 +183,29 @@ Pestañas de la bandeja del agente (HU-03):
 
 Si el usuario actual es solicitante, el backend ignora `solicitanteId` y siempre filtra por él (RN-20); los demás filtros se aplican sobre sus casos.
 
+### Rutas con `{id}`
+
+En todas las rutas `/casos/{id}/…`, un `id` que no es un entero positivo responde `400 VALIDACION` con `detalles[].campo = "id"`, y un caso que no existe, `404 NO_ENCONTRADO`. Las tablas de errores de abajo no repiten estos dos casos ni el `401 USUARIO_REQUERIDO`.
+
+### PATCH /casos/{id}/clasificacion
+
+El agente corrige la clasificación mientras analiza el caso (HU-05, RN-08). Se envía solo lo que cambia; `areaId` y `categoriaId` van siempre juntos para poder comprobar que la categoría pertenece al área (RN-03).
+
+```json
+{ "prioridad": "P1" }
+{ "tipo": "SOLICITUD", "areaId": 3, "categoriaId": 8 }
+```
+
+Responde `200` con el caso actualizado y crea un evento `RECLASIFICACION` cuyo `comentario` describe los cambios, separados por `; `: `prioridad: P3 → P1`, `tipo: INCIDENTE → SOLICITUD`, `categoría: Proyector (Hardware) → Wi-Fi (Red y conectividad)`. Si los valores enviados son los que el caso ya tiene, responde `200` con el caso sin crear evento.
+
+| Situación | Respuesta |
+|---|---|
+| Body vacío, valores fuera de la lista, o `areaId` sin `categoriaId` (o al revés) | `400 VALIDACION` |
+| No es `AGENTE` | `403 ROL_NO_PERMITIDO` |
+| Caso `CERRADA` | `409 CASO_CERRADO` |
+| Caso en un estado distinto de `PENDIENTE` o `EN_ANALISIS` | `409 ESTADO_NO_PERMITE_OPERACION` |
+| La categoría no existe, está inactiva o no es del área enviada | `409 CATEGORIA_INVALIDA` |
+
 
 ### PATCH /casos/{id}/asignar
 
@@ -190,7 +213,15 @@ Si el usuario actual es solicitante, el backend ignora `solicitanteId` y siempre
 { "agenteId": 3 }
 ```
 
-Si el agente se asigna a sí mismo, manda su propio id.
+Si el agente se asigna a sí mismo, manda su propio id. Responde `200` con el caso actualizado (`agente` y `fechaAsignacion`) y crea un evento `ASIGNACION` con `comentario` `"Asignado a <nombre>"` o, si ya tenía agente, `"Reasignado de <anterior> a <nuevo>"`. La línea de tiempo del front lee ese texto. Asignar el agente que el caso ya tiene responde `200` sin evento y sin cambiar la fecha.
+
+| Situación | Respuesta |
+|---|---|
+| Falta `agenteId` o no es un entero positivo | `400 VALIDACION` |
+| No es `AGENTE` | `403 ROL_NO_PERMITIDO` |
+| Caso `CERRADA` | `409 CASO_CERRADO` |
+| Caso en un estado distinto de `PENDIENTE` o `EN_ANALISIS` (RN-19) | `409 ESTADO_NO_PERMITE_OPERACION` |
+| `agenteId` no es un usuario activo con rol `AGENTE` (RN-18) | `409 AGENTE_INVALIDO` |
 
 ### PATCH /casos/{id}/estado
 
@@ -198,13 +229,38 @@ Si el agente se asigna a sí mismo, manda su propio id.
 { "estado": "EN_ATENCION" }
 ```
 
-No acepta `CERRADA`. Devuelve `409` si la transición no está permitida.
+Solo para `AGENTE`. Responde `200` con el caso actualizado y crea un evento `CAMBIO_ESTADO` con el estado anterior y el nuevo. Las únicas transiciones de esta ruta son `PENDIENTE → EN_ANALISIS → EN_ATENCION → EN_VALIDACION`; las salidas de `EN_VALIDACION` son de `POST /validacion`. La tabla vive en `src/domain/estados.ts` del backend.
+
+| Situación | Respuesta |
+|---|---|
+| `estado` falta o no es uno de los cinco valores | `400 VALIDACION` |
+| No es `AGENTE` | `403 ROL_NO_PERMITIDO` |
+| Caso `CERRADA` (RN-10) | `409 CASO_CERRADO` |
+| `estado: CERRADA`, saltarse un estado, retroceder, pedir el mismo estado o salir de `EN_VALIDACION` (RN-09, RN-14) | `409 TRANSICION_INVALIDA` |
+| A `EN_ATENCION` sin agente asignado (RN-11) | `409 SIN_AGENTE_ASIGNADO` |
+| A `EN_VALIDACION` sin una atención posterior a la última devolución (RN-13) | `409 SIN_SOLUCION` |
+
+> Pendiente: la tabla de transiciones de [02-requisitos.md](02-requisitos.md) dice que `En análisis → En atención` y `En atención → En validación` las hace el **agente asignado**. Hoy el backend solo comprueba que el usuario sea `AGENTE`, no que sea el asignado.
 
 ### POST /casos/{id}/atencion
 
 ```json
 { "diagnostico": "El AP del segundo piso estaba apagado.", "solucion": "Se reinició el AP y se verificó conexión." }
 ```
+
+Los dos campos son obligatorios, con mínimo 10 caracteres sin contar espacios al inicio y al final; se guardan recortados. Responde `201` con la atención creada y crea el evento `ATENCION`. El estado del caso no cambia: el agente lo envía después con `PATCH /estado` a `EN_VALIDACION`.
+
+```json
+{ "id": 3, "casoId": 14, "diagnostico": "…", "solucion": "…", "fecha": "2026-10-12T21:33:20Z", "agente": { "id": 3, "nombre": "Andrés Pérez" } }
+```
+
+| Situación | Respuesta |
+|---|---|
+| Falta un campo o tiene menos de 10 caracteres | `400 VALIDACION` (con `detalles[].campo` = `diagnostico` o `solucion`) |
+| No es `AGENTE` | `403 ROL_NO_PERMITIDO` |
+| Es agente pero no el asignado al caso (RN-12) | `403 NO_ES_AGENTE_ASIGNADO` |
+| Caso `CERRADA` | `409 CASO_CERRADO` |
+| Caso en un estado distinto de `EN_ATENCION` (RN-12) | `409 ESTADO_NO_PERMITE_OPERACION` |
 
 ### POST /casos/{id}/validacion
 
@@ -236,6 +292,10 @@ Solo para `VALIDADOR`. Responde `200` con el caso actualizado.
 ```
 
 Eventos: `CREACION`, `RECLASIFICACION`, `ASIGNACION`, `CAMBIO_ESTADO`, `ATENCION`, `APROBACION`, `DEVOLUCION`.
+
+Agente, validador y administrador ven el historial de cualquier caso; un solicitante solo el de sus casos, si no responde `403 CASO_AJENO` (RN-20). Igual que en `GET /casos/{id}`, el `404` se comprueba antes del `403`, para que un solicitante no pueda averiguar qué ids existen.
+
+`comentario` trae el texto de la asignación (`"Asignado a …"`, `"Reasignado de … a …"`), el detalle de la reclasificación o el motivo de la devolución; en los demás eventos es `null`.
 
 ### GET /indicadores
 
