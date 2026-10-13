@@ -264,4 +264,37 @@ Solo para `ADMINISTRADOR`. Acepta los filtros opcionales `desde` y `hasta` (`YYY
 - `devoluciones`: número de eventos `DEVOLUCION` del rango. Se filtra por la fecha del evento, no por la creación del caso.
 - Los días se toman en UTC: `desde` empieza a las `00:00:00Z` y `hasta` termina a las `23:59:59.999Z`.
 
+#### Cómo se calcula
+
+Todos los indicadores salen de la tabla `caso` (y `historial` para las devoluciones) y respetan el filtro `desde`/`hasta` sobre la fecha de creación del caso, salvo `devoluciones`, que usa la fecha del evento. Las horas se calculan como diferencia entre dos fechas dividida entre 3600, se promedian y se redondean a 1 decimal.
+
+| Indicador | Fórmula | Qué casos entran | Unidad | Sin datos |
+|---|---|---|---|---|
+| `total` | Número de casos | Todos los creados en el rango, en cualquier estado | Casos | `0` |
+| `porEstado` | Casos agrupados por `estado` | Los mismos del `total` | Casos | `0` en cada estado |
+| `porTipo` | Casos agrupados por `tipo` | Los mismos del `total` | Casos | `0` en cada tipo |
+| `porPrioridad` | Casos agrupados por `prioridad` | Los mismos del `total` | Casos | `0` en cada prioridad |
+| `porArea` | Casos agrupados por el área de su categoría (el caso no guarda el área, RN-03) | Los mismos del `total` | Casos | `cantidad: 0`; siempre salen las 5 áreas |
+| `promedioHorasHastaAsignacion` | Promedio de `fechaAsignacion − fechaCreacion` | Solo los casos con `fechaAsignacion` (asignados alguna vez). Si un caso se reasigna, cuenta la fecha de la última asignación | Horas, 1 decimal | `null` |
+| `promedioHorasResolucion` | Promedio de `fechaCierre − fechaCreacion` | Solo los casos `CERRADA` (RN-14). Los casos abiertos no entran | Horas, 1 decimal | `null` |
+| `devoluciones` | Número de eventos `DEVOLUCION` del historial | Los eventos cuya fecha cae en el rango, aunque el caso se haya creado fuera de él | Eventos | `0` |
+
+Ejemplo con 5 casos creados el 05/10/2026:
+
+| Caso | Estado | Creado | Asignado | Cerrado | Horas hasta asignación | Horas de resolución |
+|---|---|---|---|---|---|---|
+| 1 | CERRADA | 08:00 | 10:00 | 18:00 | 2 | 10 |
+| 2 | CERRADA | 08:00 | 14:00 | 04:00 del día 06 | 6 | 20 |
+| 3 | EN_ATENCION | 09:00 | 10:00 | – | 1 | – |
+| 4 | PENDIENTE | 10:00 | – | – | – | – |
+| 5 | EN_VALIDACION | 11:00 | 14:00 | – | 3 | – |
+
+- `promedioHorasHastaAsignacion` = (2 + 6 + 1 + 3) / 4 = **3,0**. El caso 4 no tiene asignación y no entra.
+- `promedioHorasResolucion` = (10 + 20) / 2 = **15,0**. Solo entran los casos 1 y 2.
+- `total` = **5** y `porEstado` = `PENDIENTE 1, EN_ATENCION 1, EN_VALIDACION 1, CERRADA 2`.
+
+Dos casos del rango tuvieron una devolución en el historial: `devoluciones` = **2**. Si se filtra `desde=2026-10-06&hasta=2026-10-06`, no entra ningún caso: `total` = 0, los dos promedios son `null` y `devoluciones` = 0.
+
+No confundir con las métricas del flujo del equipo: los indicadores del producto miden **cuánto tardan los casos de soporte** en asignarse y resolverse, y las métricas de [07-metricas.md](07-metricas.md) (Lead y Cycle Time) miden **cuánto tardó el equipo en terminar las historias** del backlog.
+
 Errores: `400 VALIDACION` (fecha con otro formato o inexistente, parámetro repetido, o `desde` posterior a `hasta`) y `403 ROL_NO_PERMITIDO` (no es administrador).
