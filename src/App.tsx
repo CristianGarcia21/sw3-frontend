@@ -8,7 +8,6 @@ import { Categorias } from './pages/Categorias'
 import { Componentes } from './pages/Componentes'
 import { DetalleCaso } from './pages/DetalleCaso'
 import { DetalleMiCaso } from './pages/DetalleMiCaso'
-import { EnConstruccion } from './pages/EnConstruccion'
 import { Inicio } from './pages/Inicio'
 import { MisCasos } from './pages/MisCasos'
 import { NoEncontrada } from './pages/NoEncontrada'
@@ -19,7 +18,6 @@ import { RUTAS } from './utils/navegacion'
 // Indicadores trae Recharts, que pesa bastante: se descarga solo al entrar a esa pantalla
 const Indicadores = lazy(() => import('./pages/Indicadores').then((m) => ({ default: m.Indicadores })))
 
-// Cada tarea reemplaza su <EnConstruccion> por la pantalla real
 export default function App() {
   return (
     <Routes>
